@@ -76,3 +76,29 @@ export function monthGrid(y: number, m: number) {
   }
   return cells;
 }
+
+export type HourSlot = { zhi: string; gan: string; yi: string[]; ji: string[] };
+
+export function hourSlots(y: number, m: number, d: number): HourSlot[] {
+  const hours = [0, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21];
+  return hours.map((h) => {
+    const solar = Solar.fromYmdHms(y, m, d, h, 0, 0);
+    const lunar = solar.getLunar();
+    let yi: string[] = [];
+    let ji: string[] = [];
+    const anyL = lunar as unknown as { getTimeYi?: () => string[]; getTimeJi?: () => string[] };
+    try {
+      yi = anyL.getTimeYi?.() ?? [];
+      ji = anyL.getTimeJi?.() ?? [];
+    } catch {
+      yi = [];
+      ji = [];
+    }
+    return {
+      zhi: lunar.getTimeZhi(),
+      gan: lunar.getTimeGan(),
+      yi: yi.slice(0, 2),
+      ji: ji.slice(0, 2),
+    };
+  });
+}

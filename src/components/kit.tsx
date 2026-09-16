@@ -1,8 +1,9 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { interpretLocal } from "@/lib/horosa/interpret";
+import { ALL_TECHNIQUES } from "@/lib/horosa/catalog";
 
 export function Screen({
   title,
@@ -13,21 +14,35 @@ export function Screen({
   children: React.ReactNode;
   action?: React.ReactNode;
 }) {
-  const router = useRouter();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const nearby = ALL_TECHNIQUES.filter((t) => t.path !== "/history");
   return (
-    <div className="mx-auto w-full px-4 pb-16 pt-2 md:px-5 md:pb-8 md:pt-3 lg:px-6">
-      <header className="mb-5 flex items-center gap-1 lg:mb-6">
-        <button
-          type="button"
-          onClick={() => router.history.back()}
+    <div className="mx-auto w-full px-4 pb-8 pt-2 md:px-5 md:pb-8 md:pt-3 lg:px-6">
+      <header className="mb-3 flex items-center gap-1 lg:mb-6">
+        <Link
+          to="/catalog"
           className="flex size-11 items-center justify-center text-ink transition-transform duration-150 ease-out active:scale-[0.96] md:hidden"
-          aria-label="返回"
+          aria-label="排盘"
         >
           <ChevronLeft className="size-6" strokeWidth={1.5} />
-        </button>
+        </Link>
         <h1 className="font-display text-xl font-medium leading-tight tracking-tight md:text-2xl">{title}</h1>
         <div className="ml-auto">{action}</div>
       </header>
+      <div className="-mx-4 mb-4 flex overflow-x-auto border-b border-line px-2 [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden">
+        {nearby.map((t) => (
+          <Link
+            key={t.path}
+            to={t.path as never}
+            className={cn(
+              "h-10 shrink-0 px-3 text-sm",
+              pathname === t.path ? "border-b border-ink text-ink" : "text-muted",
+            )}
+          >
+            {t.name}
+          </Link>
+        ))}
+      </div>
       {children}
     </div>
   );

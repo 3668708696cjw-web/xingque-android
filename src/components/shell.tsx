@@ -33,7 +33,6 @@ function groupOf(path: string) {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const showTab = TAB_PATHS.has(pathname);
   const setHydrated = useChartStore((s) => s.setHydrated);
   const setDraft = useChartStore((s) => s.setDraft);
   const [tabletGroup, setTabletGroup] = useState<string>("");
@@ -146,27 +145,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ) : null}
         </div>
 
-        <div className={cn("mx-auto w-full max-w-[1680px] flex-1", showTab && "pb-20 md:pb-0")}>{children}</div>
+        <div className={cn("mx-auto w-full max-w-[1680px] flex-1 pb-[calc(4.75rem+env(safe-area-inset-bottom))] md:pb-0")}>{children}</div>
       </div>
 
-      {showTab ? (
-        <nav className="fixed inset-x-0 bottom-0 z-20 pb-[env(safe-area-inset-bottom)] md:hidden">
-          <div className="border-t border-line bg-bg/95 backdrop-blur-sm">
-            <div className="mx-auto grid max-w-lg grid-cols-4">
-              {TABS.map((t) => {
-                const on = pathname === t.to;
-                const Icon = t.icon;
-                return (
-                  <Link key={t.to} to={t.to} className="flex h-14 flex-col items-center justify-center gap-0.5">
-                    <Icon className="size-4" strokeWidth={on ? 2 : 1.5} />
-                    <span className={cn("text-[10px] tracking-wide", on ? "text-ink" : "text-muted")}>{t.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
+      <nav className="fixed inset-x-0 bottom-0 z-20 pb-[env(safe-area-inset-bottom)] md:hidden">
+        <div className="border-t border-line bg-bg/95 backdrop-blur-sm">
+          <div className="mx-auto grid max-w-lg grid-cols-4">
+            {TABS.map((t) => {
+              const on =
+                t.to === "/catalog"
+                  ? pathname === "/catalog" || (!TAB_PATHS.has(pathname) && pathname !== "/about")
+                  : t.to === "/history"
+                    ? pathname.startsWith("/history")
+                    : pathname === t.to;
+              const Icon = t.icon;
+              return (
+                <Link key={t.to} to={t.to} className="flex h-14 flex-col items-center justify-center gap-0.5">
+                  <Icon className="size-4" strokeWidth={on ? 2 : 1.5} />
+                  <span className={cn("text-[10px] tracking-wide", on ? "text-ink" : "text-muted")}>{t.label}</span>
+                </Link>
+              );
+            })}
           </div>
-        </nav>
-      ) : null}
+        </div>
+      </nav>
     </div>
   );
 }

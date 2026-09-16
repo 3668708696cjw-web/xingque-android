@@ -73,6 +73,14 @@ const HUAGAI: Record<string, string> = { 申: "辰", 子: "辰", 辰: "辰", 寅
 const YIMA: Record<string, string> = { 申: "寅", 子: "寅", 辰: "寅", 寅: "申", 午: "申", 戌: "申", 亥: "巳", 卯: "巳", 未: "巳", 巳: "亥", 酉: "亥", 丑: "亥" };
 const YANGREN: Record<string, string> = { 甲: "卯", 乙: "寅", 丙: "午", 丁: "巳", 戊: "午", 己: "巳", 庚: "酉", 辛: "申", 壬: "子", 癸: "亥" };
 
+const TIANDE: Record<number, string> = { 1: "丁", 2: "申", 3: "壬", 4: "辛", 5: "亥", 6: "甲", 7: "癸", 8: "寅", 9: "丙", 10: "乙", 11: "巳", 12: "庚" };
+const YUEDE: Record<number, string> = { 1: "丙", 2: "甲", 3: "壬", 4: "庚", 5: "丙", 6: "甲", 7: "壬", 8: "庚", 9: "丙", 10: "甲", 11: "壬", 12: "庚" };
+const JIANGXING: Record<string, string> = { 申: "子", 子: "子", 辰: "子", 寅: "午", 午: "午", 戌: "午", 亥: "卯", 卯: "卯", 未: "卯", 巳: "酉", 酉: "酉", 丑: "酉" };
+const WANGSHEN: Record<string, string> = { 申: "亥", 子: "亥", 辰: "亥", 寅: "巳", 午: "巳", 戌: "巳", 亥: "申", 卯: "申", 未: "申", 巳: "寅", 酉: "寅", 丑: "寅" };
+const GUCHEN: Record<string, string> = { 亥: "寅", 子: "寅", 丑: "寅", 寅: "巳", 卯: "巳", 辰: "巳", 巳: "申", 午: "申", 未: "申", 申: "亥", 酉: "亥", 戌: "亥" };
+const GUASU: Record<string, string> = { 亥: "戌", 子: "戌", 丑: "戌", 寅: "丑", 卯: "丑", 辰: "丑", 巳: "辰", 午: "辰", 未: "辰", 申: "未", 酉: "未", 戌: "未" };
+const KUIGANG = new Set(["庚辰", "庚戌", "壬辰", "戊戌"]);
+
 const GAN_HE: [string, string, string][] = [
   ["甲", "己", "合土"],
   ["乙", "庚", "合金"],
@@ -278,6 +286,16 @@ export function computeBazi(b: BirthInput): BaziResult {
     if (HUAGAI[pillars[2].zhi] === p.zhi) shensha.push({ name: "华盖", at: p.label });
     if (YIMA[pillars[2].zhi] === p.zhi) shensha.push({ name: "驿马", at: p.label });
     if (YANGREN[dayGan] === p.zhi) shensha.push({ name: "羊刃", at: p.label });
+    if (JIANGXING[pillars[0].zhi] === p.zhi) shensha.push({ name: "将星", at: p.label });
+    if (WANGSHEN[pillars[0].zhi] === p.zhi) shensha.push({ name: "亡神", at: p.label });
+    if (GUCHEN[pillars[0].zhi] === p.zhi) shensha.push({ name: "孤辰", at: p.label });
+    if (GUASU[pillars[0].zhi] === p.zhi) shensha.push({ name: "寡宿", at: p.label });
+    if (KUIGANG.has(p.gan + p.zhi)) shensha.push({ name: "魁罡", at: p.label });
+  });
+  const monthNum = lunar.getMonth();
+  pillars.forEach((p) => {
+    if (TIANDE[monthNum] === p.gan || TIANDE[monthNum] === p.zhi) shensha.push({ name: "天德", at: p.label });
+    if (YUEDE[monthNum] === p.gan) shensha.push({ name: "月德", at: p.label });
   });
   const scores: Record<string, number> = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
   pillars.forEach((p) => {

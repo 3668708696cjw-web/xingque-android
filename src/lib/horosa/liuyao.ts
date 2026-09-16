@@ -43,6 +43,9 @@ export type YaoLine = {
   shen: string;
   shi: boolean;
   ying: boolean;
+  fu?: string;
+  yuepo?: boolean;
+  xunkong?: boolean;
 };
 
 export type LiuYaoResult = {
@@ -88,15 +91,16 @@ function shiYing(bits: number): [number, number] {
   return [shi, (shi + 3) % 6];
 }
 
-function buildLines(bits: number, changing: boolean[], dayGan: string): YaoLine[] {
+function buildLines(bits: number, changing: boolean[], dayGan: string, dayZhi?: string, xunkong?: string): YaoLine[] {
   const { lower, wx } = palGong(bits);
   const [shi, ying] = shiYing(bits);
   const start = SHEN_START[dayGan] ?? 0;
-  return [0, 1, 2, 3, 4, 5].map((i) => {
+  const lines: YaoLine[] = [0, 1, 2, 3, 4, 5].map((i) => {
     const yang = ((bits >> i) & 1) === 1;
     const najia = NAIJIA[i < 3 ? lower : (bits >> 3) & 7][i];
     const zhi = najia.slice(1);
     const qin = QIN[wx]?.[ZHI_WX[zhi]] ?? "";
+    const chong: Record<string, string> = { 子: "午", 午: "子", 丑: "未", 未: "丑", 寅: "申", 申: "寅", 卯: "酉", 酉: "卯", 辰: "戌", 戌: "辰", 巳: "亥", 亥: "巳" };
     return {
       pos: i + 1,
       yang,
@@ -106,8 +110,18 @@ function buildLines(bits: number, changing: boolean[], dayGan: string): YaoLine[
       shen: LIUSHEN[(start + i) % 6],
       shi: i === shi,
       ying: i === ying,
+      yuepo: Boolean(dayZhi && chong[dayZhi] === zhi),
+      xunkong: Boolean(xunkong && xunkong.includes(zhi)),
     };
   });
+  const have = new Set(lines.map((l) => l.qin));
+  const missing = ["兄弟", "子孙", "妻财", "官鬼", "父母"].filter((q) => !have.has(q));
+  const home = NAIJIA[lower];
+  missing.forEach((q) => {
+    const hit = home.findIndex((nj) => QIN[wx]?.[ZHI_WX[nj.slice(1)]] === q);
+    if (hit >= 0) lines[hit].fu = q;
+  });
+  return lines;
 }
 
 export function throwCoins(seed?: number) {
@@ -132,6 +146,11 @@ function mulberry(seed: number) {
 export function computeLiuyaoFromCoins(coins: number[], b: BirthInput): LiuYaoResult {
   const lunar = lunarOf(b);
   const dayG = lunar.getEightChar().getDayGan();
+  const dayZ = lunar.getEightChar().getDayZhi();
+  const gi = GAN.indexOf(dayG as (typeof GAN)[number]);
+  const zi = ZHI.indexOf(dayZ as (typeof ZHI)[number]);
+  const startZ = (zi - gi + 12) % 12;
+  const xk = `${ZHI[(startZ + 10) % 12]}${ZHI[(startZ + 11) % 12]}`;
   let bits = 0;
   const changing: boolean[] = [];
   coins.forEach((c, i) => {
@@ -149,8 +168,8 @@ export function computeLiuyaoFromCoins(coins: number[], b: BirthInput): LiuYaoRe
     huName: bitsToName(huBitsOf(bits)),
     upper: TRIGRAM[(bits >> 3) & 7],
     lower: TRIGRAM[bits & 7],
-    lines: buildLines(bits, changing, dayG),
-    changeLines: buildLines(changeBits, [false, false, false, false, false, false], dayG),
+    lines: buildLines(bits, changing, dayG, dayZ, String(xk)),
+    changeLines: buildLines(changeBits, [false, false, false, false, false, false], dayG, dayZ, String(xk)),
     day: lunar.getDayInGanZhi(),
     method: "金钱卦",
     coins,

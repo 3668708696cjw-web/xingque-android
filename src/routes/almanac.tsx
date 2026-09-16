@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Screen, Workbench } from "@/components/kit";
-import { almanacOf, monthGrid } from "@/lib/horosa/almanac";
+import { almanacOf, hourSlots, monthGrid } from "@/lib/horosa/almanac";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/almanac")({ component: Page });
@@ -13,6 +13,7 @@ function Page() {
   const [d, setD] = useState(now.getDate());
   const a = useMemo(() => almanacOf(y, m, d, 12, 0), [y, m, d]);
   const cells = useMemo(() => monthGrid(y, m), [y, m]);
+  const hours = useMemo(() => hourSlots(y, m, d), [y, m, d]);
   return (
     <Screen title="黄历">
       <Workbench
@@ -102,6 +103,20 @@ function Page() {
               <br />
               {a.xingzuo}座 · 下节 {a.nextJie}
             </p>
+            <div className="mt-6">
+              <h3 className="text-[11px] text-muted">时辰</h3>
+              <ul className="mt-2 grid grid-cols-3 gap-2 text-xs sm:grid-cols-4">
+                {hours.map((h) => (
+                  <li key={h.zhi} className="border-b border-line py-2">
+                    <div className="font-display text-sm">
+                      {h.gan}
+                      {h.zhi}
+                    </div>
+                    <div className="text-muted">{h.yi[0] || h.ji[0] || "—"}</div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         }
       />

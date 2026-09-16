@@ -79,10 +79,10 @@
   .workbench {
     display: grid;
     grid-template-areas:
-      "params"
       "canvas"
+      "params"
       "panel";
-    gap: 1.5rem;
+    gap: 1.25rem;
     align-items: start;
   }
 
@@ -135,13 +135,18 @@
   .chart-stage {
     width: 100%;
     min-width: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y pinch-zoom;
   }
 
   .chart-svg {
     display: block;
     width: 100%;
+    min-width: min(100%, 22rem);
     height: auto;
     overflow: visible;
+    touch-action: pan-x pan-y pinch-zoom;
   }
 
   .wh-face {

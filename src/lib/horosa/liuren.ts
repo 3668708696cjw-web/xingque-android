@@ -93,8 +93,25 @@ export function computeLiuren(b: BirthInput): LiuRenResult {
     const pool = zei.length ? zei : keList;
     const dayYang = GAN.indexOf(dayG as (typeof GAN)[number]) % 2 === 0;
     const matched = pool.filter((x) => idx(x.upper) % 2 === (dayYang ? 0 : 1));
-    chu = (matched[0] ?? pool[0]).upper;
-    method = "比用";
+    if (matched.length <= 1) {
+      chu = (matched[0] ?? pool[0]).upper;
+      method = matched.length === 1 ? "比用" : "涉害";
+    } else {
+      const meng = new Set(["寅", "申", "巳", "亥"]);
+      const scored = matched.map((x) => {
+        let n = 0;
+        let z = x.lower.length === 1 ? x.lower : dayZ;
+        for (let k = 0; k < 12; k++) {
+          z = zhiAt(idx(z) + 1);
+          n++;
+          if (meng.has(z) || z === x.upper) break;
+        }
+        return { x, n };
+      });
+      scored.sort((a, b) => b.n - a.n);
+      chu = scored[0].x.upper;
+      method = "涉害";
+    }
   } else if (firstU === ganHome && thirdU === dayZ) {
     method = "伏吟";
     chu = firstU;

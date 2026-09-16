@@ -34,9 +34,9 @@ function Catalog() {
                 <Link
                   key={i.path}
                   to={i.path as never}
-                  className="flex min-h-[8.5rem] flex-col justify-between bg-bg p-4 transition-colors hover:bg-surface md:min-h-[9.5rem]"
+                  className="flex min-h-[6.75rem] flex-col justify-between bg-bg p-3.5 transition-colors hover:bg-surface md:min-h-[9.5rem] md:p-4"
                 >
-                  <span className="font-display text-3xl text-cinnabar">{i.mark}</span>
+                  <span className="font-display text-2xl text-cinnabar md:text-3xl">{i.mark}</span>
                   <span>
                     <span className="block font-display text-lg">{i.name}</span>
                     <span className="mt-1 block text-xs leading-5 text-muted">{i.blurb}</span>

@@ -4,14 +4,15 @@
 
 ## 下载 APK
 
-**[Xingque-offline-1.6.0.apk](https://github.com/3668708696cjw-web/xingque-android/releases/download/v1.6.0/Xingque-offline-1.6.0.apk)**
+**[Xingque-offline-1.7.0.apk](https://github.com/3668708696cjw-web/xingque-android/releases/download/v1.7.0/Xingque-offline-1.7.0.apk)**
 
-覆盖安装即可。包名 `app.xingque.offline` · Android 5.1+
+覆盖安装。包名 `app.xingque.offline` · Android 5.1+
 
-## 这一版
+## 1.7
 
-- 起盘可拉系统时间（「用系统时间 / 此刻」），并保存命例到本机
-- 右侧页签改为可折叠收纳
-- 七政二十八宿、金口四位（加人元）、太乙计神合神、风水大游年 + 紫白、星运太阳弧/小限、紫微流年四化
+- 手机：先看盘，底栏常在，技法顶栏横滑切换
+- 奇门转盘/飞盘、拆补/置闰
+- 六壬涉害课体、八字神煞扩表、六爻伏神月破旬空
+- 印占宿+Vimshottari、黄历时辰
 
-源码在本仓库 `src/`。
+源码在 `src/`。Windows 桌面 Swiss 星历 / 三维天文馆 / 数万条天象库不在此离线包。

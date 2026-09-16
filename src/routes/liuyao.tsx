@@ -64,6 +64,9 @@ function Page() {
                             </span>
                             <span className="text-muted">
                               {l.shen} {l.qin} {l.najia}
+                              {l.fu ? ` 伏${l.fu}` : ""}
+                              {l.yuepo ? " 破" : ""}
+                              {l.xunkong ? " 空" : ""}
                             </span>
                           </li>
                         ))}

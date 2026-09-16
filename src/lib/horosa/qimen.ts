@@ -110,6 +110,8 @@ export type QimenResult = {
   zhishi: string;
   ganzhi: string;
   maPalace: number;
+  mode: "转盘" | "飞盘";
+  dingju: "拆补" | "置闰";
   cells: QimenCell[];
   patterns: QimenPattern[];
 };
@@ -126,16 +128,19 @@ function xunShou(gan: string, zhi: string) {
   return { gan: "甲", zhi: zg, yi: yiMap[zg] ?? "戊" };
 }
 
-export function computeQimen(b: BirthInput): QimenResult {
+export function computeQimen(b: BirthInput, opts?: { mode?: "转盘" | "飞盘"; dingju?: "拆补" | "置闰" }): QimenResult {
   const lunar = lunarOf(b);
+  const mode = opts?.mode ?? "转盘";
+  const dingju = opts?.dingju ?? "拆补";
   const jie = lunar.getPrevJieQi(true);
   const jieName = jie.getName();
-  const solar = jie.getSolar();
+  const solar0 = jie.getSolar();
   const jieDays = Math.floor(
-    (Date.UTC(b.year, b.month - 1, b.day) - Date.UTC(solar.getYear(), solar.getMonth() - 1, solar.getDay())) /
+    (Date.UTC(b.year, b.month - 1, b.day) - Date.UTC(solar0.getYear(), solar0.getMonth() - 1, solar0.getDay())) /
       86400000,
   );
-  const yuanIdx = Math.min(2, Math.max(0, Math.floor(jieDays / 5)));
+  let yuanIdx = Math.min(2, Math.max(0, Math.floor(jieDays / 5)));
+  if (dingju === "置闰" && (jieName === "芒种" || jieName === "大雪") && jieDays > 9) yuanIdx = 2;
   const yang = Boolean(YANG_JU[jieName]);
   const table = yang ? YANG_JU : YIN_JU;
   const ju = (table[jieName] ?? [1, 7, 4])[yuanIdx];
@@ -167,6 +172,16 @@ export function computeQimen(b: BirthInput): QimenResult {
     const originPalace = fly[(i - shift + 8) % 8];
     tianStar[p] = STARS[originPalace - 1];
   });
+  if (mode === "飞盘") {
+    const luo = yang ? [1, 8, 3, 4, 9, 2, 7, 6] : [1, 6, 7, 2, 9, 4, 3, 8];
+    const fuLuo = Math.max(0, luo.indexOf(fuPalace === 5 ? (yang ? 2 : 8) : fuPalace));
+    const ganLuo = Math.max(0, luo.indexOf(ganPalace === 5 ? (yang ? 2 : 8) : ganPalace));
+    const flyShift = (ganLuo - fuLuo + 8) % 8;
+    luo.forEach((p, i) => {
+      const origin = luo[(i - flyShift + 8) % 8];
+      tianStar[p] = STARS[origin - 1];
+    });
+  }
   if (fuStar === "天禽") tianStar[ganPalace] = "天禽";
 
   const doorHome: Record<number, string> = {};
@@ -259,6 +274,8 @@ export function computeQimen(b: BirthInput): QimenResult {
     zhishi: fuDoor,
     ganzhi: `${lunar.getYearInGanZhi()} ${lunar.getMonthInGanZhi()} ${lunar.getDayInGanZhi()} ${lunar.getTimeInGanZhi()}`,
     maPalace,
+    mode,
+    dingju,
     cells,
     patterns,
   };

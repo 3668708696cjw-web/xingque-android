@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
 import { QimenBoard } from "@/components/boards";
-import { Interpret, Meta, PanelSections, Screen, Workbench } from "@/components/kit";
+import { Chip, Interpret, Meta, PanelSections, Screen, Workbench } from "@/components/kit";
 import { computeQimen } from "@/lib/horosa/qimen";
 import { useChartStore } from "@/lib/horosa/store";
 import { cn } from "@/lib/utils";
@@ -11,16 +11,24 @@ export const Route = createFileRoute("/qimen")({ component: Page });
 
 function Page() {
   const draft = useChartStore((s) => s.draft);
-  const data = useMemo(() => computeQimen(draft), [draft]);
+  const [mode, setMode] = useState<"转盘" | "飞盘">("转盘");
+  const [dingju, setDingju] = useState<"拆补" | "置闰">("拆补");
+  const data = useMemo(() => computeQimen(draft, { mode, dingju }), [draft, mode, dingju]);
   return (
     <Screen title="奇门">
       <Workbench
         params={<BirthPanel submitLabel="排盘" />}
         canvas={
           <div>
+            <div className="-ml-3 mb-2 flex flex-wrap">
+              <Chip active={mode === "转盘"} onClick={() => setMode("转盘")}>转盘</Chip>
+              <Chip active={mode === "飞盘"} onClick={() => setMode("飞盘")}>飞盘</Chip>
+              <Chip active={dingju === "拆补"} onClick={() => setDingju("拆补")}>拆补</Chip>
+              <Chip active={dingju === "置闰"} onClick={() => setDingju("置闰")}>置闰</Chip>
+            </div>
             <Meta>
               {data.jieqi} · {data.yang ? "阳" : "阴"}
-              {data.ju}局 {data.yuan} · 值符{data.zhifu} 值使{data.zhishi}
+              {data.ju}局 {data.yuan} · 值符{data.zhifu} 值使{data.zhishi} · {data.mode}{data.dingju}
             </Meta>
             <p className="mt-1 text-xs text-faint">
               {data.ganzhi} · 旬首{data.xunshou} · 空亡{data.kongwang}
@@ -71,8 +79,7 @@ function Page() {
                     </ul>
                   ) : (
                     <p className="text-sm leading-7 text-muted">
-                      值符 {data.zhifu}，值使 {data.zhishi}。旬空 {data.kongwang}。驿马在
-                      {data.cells.find((c) => c.ma)?.name ?? "—"}宫。
+                      值符 {data.zhifu}，值使 {data.zhishi}。旬空 {data.kongwang}。
                     </p>
                   ),
                 },
