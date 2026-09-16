@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">星阙</string>
+    <string name="title_activity_main">星阙</string>
+    <string name="package_name">app.xingque.offline</string>
+    <string name="custom_url_scheme">app.xingque.offline</string>
+</resources>
