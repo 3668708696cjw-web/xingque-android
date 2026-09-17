@@ -1,39 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Ghost, Interpret, Meta, Primary, Screen, Workbench } from "@/components/kit";
-import { throwLingqi, type LingqiResult } from "@/lib/horosa/modules";
+import { useMemo, useState } from "react";
+import { BirthPanel } from "@/components/birth-form";
+import { Ghost, Interpret, Primary, Screen, Workbench } from "@/components/kit";
+import { LingqiStones } from "@/components/tech-boards";
+import { throwLingqi } from "@/lib/horosa/modules";
+import { useChartStore } from "@/lib/horosa/store";
 
 export const Route = createFileRoute("/lingqi")({ component: Page });
 
 function Page() {
-  const [data, setData] = useState<LingqiResult | null>(null);
+  const draft = useChartStore((s) => s.draft);
+  const [nudge, setNudge] = useState(0);
+  const seed = draft.year * 10000 + draft.month * 100 + draft.day + draft.hour + nudge * 29;
+  const data = useMemo(() => throwLingqi(seed), [seed]);
   return (
     <Screen title="灵棋">
       <Workbench
         params={
           <div className="space-y-3">
-            <Primary type="button" onClick={() => setData(throwLingqi())}>
+            <BirthPanel submitLabel="记下时间" />
+            <Primary type="button" onClick={() => setNudge((n) => n + 1)}>
               掷棋
             </Primary>
-            <Ghost type="button" onClick={() => setData(throwLingqi(Date.now()))}>
-              再掷
+            <Ghost type="button" onClick={() => setNudge(0)}>
+              时间棋
             </Ghost>
           </div>
         }
-        canvas={
-          data ? (
-            <div>
-              <p className="font-display text-4xl">{data.name}</p>
-              <Meta>
-                上{data.upper} 中{data.mid} 下{data.lower}
-              </Meta>
-              <p className="mt-6 max-w-md text-[15px] leading-7 text-muted">{data.ci}</p>
-            </div>
-          ) : (
-            <p className="text-sm text-muted">十二棋分上中下，掷出阳数成卦。本机随机，不连网。</p>
-          )
-        }
-        panel={data ? <Interpret kind="灵棋经" summary={`${data.name} ${data.ci}`} /> : null}
+        canvas={<LingqiStones data={data} />}
+        panel={<Interpret kind="灵棋经" summary={`${data.name} ${data.ci}`} />}
       />
     </Screen>
   );

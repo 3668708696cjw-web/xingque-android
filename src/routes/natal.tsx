@@ -2,12 +2,32 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
 import { AspectGrid, NatalWheel, type WheelStyle } from "@/components/natal-wheel";
+import { ViewBar } from "@/components/chart-kit";
 import { Bar, Block, Chip, Fold, Interpret, Meta, PanelSections, Screen, Workbench, useHydrated } from "@/components/kit";
 import { computeNatal, computeNatalAsync, visiblePlanets, type HouseSystem, type NatalChart } from "@/lib/horosa/natal";
+import { viewsOf } from "@/lib/horosa/catalog";
 import { useChartStore } from "@/lib/horosa/store";
 import { formatDMS } from "@/lib/horosa/types";
 
 export const Route = createFileRoute("/natal")({ component: Page });
+
+const STYLE_OF: Record<string, WheelStyle> = {
+  圆盘: "wheel",
+  希腊: "greek",
+  中世纪: "square",
+  北印: "north",
+  南印: "south",
+  东印: "east",
+};
+const STYLE_ZH: Record<WheelStyle, string> = {
+  wheel: "圆",
+  square: "方",
+  greek: "希",
+  north: "北",
+  south: "南",
+  east: "东",
+};
+const VIEWS = viewsOf("/natal");
 
 function Page() {
   const ready = useHydrated();
@@ -15,7 +35,7 @@ function Page() {
   const [sidereal, setSidereal] = useState(false);
   const [houses, setHouses] = useState<HouseSystem>("placidus");
   const [modern, setModern] = useState(true);
-  const [style, setStyle] = useState<WheelStyle>("wheel");
+  const [view, setView] = useState("圆盘");
   const [minors, setMinors] = useState(false);
   const fallback = useMemo(
     () => (ready ? computeNatal(draft, sidereal, houses) : null),
@@ -37,10 +57,11 @@ function Page() {
   const planets = chart
     ? visiblePlanets(chart, modern).filter((p) => minors || !["Ceres", "Pallas", "Juno", "Vesta", "Pholus"].includes(p.key))
     : [];
-  const view = chart ? { ...chart, planets } : null;
-  const aspects = view
-    ? view.aspects.filter((a) => planets.some((p) => p.key === a.a) && planets.some((p) => p.key === a.b))
+  const viewChart = chart ? { ...chart, planets } : null;
+  const aspects = viewChart
+    ? viewChart.aspects.filter((a) => planets.some((p) => p.key === a.a) && planets.some((p) => p.key === a.b))
     : [];
+  const style = STYLE_OF[view] ?? "wheel";
 
   return (
     <Screen title="占星">
@@ -49,7 +70,26 @@ function Page() {
         canvas={
           chart ? (
             <div>
-              <Fold title="盘式" defaultOpen={false} badge={`${sidereal ? "恒星" : "热带"} · ${style === "wheel" ? "圆" : style === "square" ? "方" : "印"}`}>
+              <ViewBar views={VIEWS} value={view} onChange={setView} />
+              {view === "古典/现代" ? (
+                <div className="-ml-3 mb-2 flex flex-wrap">
+                  <Chip active={!modern} onClick={() => setModern(false)}>古典七政</Chip>
+                  <Chip active={modern} onClick={() => setModern(true)}>现代行星</Chip>
+                  <Chip active={minors} onClick={() => setMinors((v) => !v)}>小行星</Chip>
+                </div>
+              ) : null}
+              {view === "宫制" ? (
+                <div className="-ml-3 mb-2 flex flex-wrap">
+                  <Chip active={houses === "placidus"} onClick={() => setHouses("placidus")}>Placidus</Chip>
+                  <Chip active={houses === "koch"} onClick={() => setHouses("koch")}>Koch</Chip>
+                  <Chip active={houses === "regio"} onClick={() => setHouses("regio")}>Regio</Chip>
+                  <Chip active={houses === "campanus"} onClick={() => setHouses("campanus")}>Campanus</Chip>
+                  <Chip active={houses === "equal"} onClick={() => setHouses("equal")}>等宫</Chip>
+                  <Chip active={houses === "whole"} onClick={() => setHouses("whole")}>整宫</Chip>
+                  <Chip active={houses === "alcabitius"} onClick={() => setHouses("alcabitius")}>Alcabitius</Chip>
+                </div>
+              ) : null}
+              <Fold title="盘式" defaultOpen={false} badge={`${sidereal ? "恒星" : "热带"} · ${STYLE_ZH[style]}`}>
                 <p className="mb-1 text-xs text-faint">黄道</p>
                 <div className="-ml-3 mb-2 flex flex-wrap">
                   <Chip active={!sidereal} onClick={() => setSidereal(false)}>热带</Chip>
@@ -66,16 +106,10 @@ function Page() {
                   <Chip active={houses === "alcabitius"} onClick={() => setHouses("alcabitius")}>Alcabitius</Chip>
                 </div>
                 <p className="mb-1 text-xs text-faint">行星</p>
-                <div className="-ml-3 mb-2 flex flex-wrap">
+                <div className="-ml-3 flex flex-wrap">
                   <Chip active={!modern} onClick={() => setModern(false)}>古典</Chip>
                   <Chip active={modern} onClick={() => setModern(true)}>现代</Chip>
                   <Chip active={minors} onClick={() => setMinors((v) => !v)}>小行星</Chip>
-                </div>
-                <p className="mb-1 text-xs text-faint">盘貌</p>
-                <div className="-ml-3 flex flex-wrap">
-                  <Chip active={style === "wheel"} onClick={() => setStyle("wheel")}>圆盘</Chip>
-                  <Chip active={style === "square"} onClick={() => setStyle("square")}>中世纪</Chip>
-                  <Chip active={style === "north"} onClick={() => setStyle("north")}>北印</Chip>
                 </div>
               </Fold>
               <div className="chart-stage mt-3">

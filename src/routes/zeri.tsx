@@ -1,48 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Chip, Screen, Workbench } from "@/components/kit";
-import { ZERI_TECHS, computeZeriDesk, type ZeriTech } from "@/lib/horosa/zeri";
+import { Screen, Workbench, useHydrated } from "@/components/kit";
+import { ViewBar, ZeriCalendar } from "@/components/chart-kit";
+import { viewsOf } from "@/lib/horosa/catalog";
+import { computeZeriDesk, type ZeriTech } from "@/lib/horosa/zeri";
 import { useChartStore } from "@/lib/horosa/store";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/zeri")({ component: Page });
 
+const VIEWS = viewsOf("/zeri") as ZeriTech[];
+
 function Page() {
+  const ready = useHydrated();
   const draft = useChartStore((s) => s.draft);
-  const [tech, setTech] = useState<ZeriTech>("黄历");
-  const days = useMemo(() => computeZeriDesk(draft, tech), [draft, tech]);
+  const [tech, setTech] = useState<ZeriTech>(VIEWS[0] ?? "黄历");
+  const days = useMemo(() => (ready ? computeZeriDesk(draft, tech) : []), [draft, tech, ready]);
   return (
     <Screen title="择日">
       <Workbench
         canvas={
           <div>
             <p className="text-sm text-muted">从今日起二十一日，十技法各算一套。本机，不连网。</p>
-            <div className="-ml-3 mt-3 flex flex-wrap">
-              {ZERI_TECHS.map((t) => (
-                <Chip key={t} active={tech === t} onClick={() => setTech(t)}>
-                  {t}
-                </Chip>
-              ))}
+            <ViewBar views={VIEWS} value={tech} onChange={(v) => setTech(v as ZeriTech)} />
+            <div className="mt-4">
+              <ZeriCalendar days={days} />
             </div>
-            <ul className="mt-4">
-              {days.map((d) => (
-                <li key={d.ymd} className="flex items-start justify-between gap-3 border-b border-line py-3">
-                  <div>
-                    <div className="font-display text-lg">
-                      {d.ymd.slice(5)} 周{d.week}
-                    </div>
-                    <p className="mt-1 text-xs text-muted">{d.detail}</p>
-                  </div>
-                  <span className={cn("shrink-0 text-sm", d.score >= 3 ? "text-cinnabar" : "text-muted")}>{d.note}</span>
-                </li>
-              ))}
-            </ul>
           </div>
         }
         panel={
-          <p className="text-sm leading-7 text-muted">
-            对照 Windows 择日十技法：黄历、天星、奇门、八字、太乙、紫微、六壬、三式、七政、印占。条件树与方案存档仍以桌面端为准。
-          </p>
+          <ul className="text-sm">
+            {days.map((d) => (
+              <li key={d.ymd} className="border-b border-line py-2.5">
+                <div className="flex justify-between">
+                  <span className="font-display">
+                    {d.ymd.slice(5)} 周{d.week}
+                  </span>
+                  <span className={d.score >= 3 ? "text-cinnabar" : "text-muted"}>{d.note}</span>
+                </div>
+                <p className="mt-1 text-xs text-muted">{d.detail}</p>
+              </li>
+            ))}
+          </ul>
         }
       />
     </Screen>

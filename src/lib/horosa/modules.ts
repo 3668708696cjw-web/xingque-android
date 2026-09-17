@@ -288,18 +288,29 @@ export function throwDice(seed?: number): DiceResult {
 export type MingOtherResult = {
   yanqin: { year: string; month: string; day: string; hour: string };
   yizhang: { palace: string; gan: string; note: string };
-  cetian: { star: string; note: string };
+  cetian: {
+    star: string;
+    note: string;
+    palaces: { branch: string; name: string; star: string; isYear: boolean }[];
+  };
 };
 
 const ANIMALS = ["鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗", "猪"];
 const PALM = ["乾", "兑", "离", "震", "巽", "坎", "艮", "坤"];
-const CETIAN = ["贪狼", "巨门", "禄存", "文曲", "廉贞", "武曲", "破军", "左辅", "右弼"];
+const CETIAN = ["贪狼", "巨门", "禄存", "文曲", "廉贞", "武曲", "破军", "左辅", "右弼", "天魁", "天钺", "文昌"];
+const CETIAN_PALACE = ["命宫", "财帛", "兄弟", "田宅", "男女", "奴仆", "夫妻", "疾厄", "迁移", "官禄", "福德", "相貌"];
 
 export function computeMingOther(b: BirthInput): MingOtherResult {
   const lunar = lunarOf(b);
   const yz = lunar.getYearInGanZhi();
   const zz = yz[1];
   const zi = Math.max(0, ZHI.indexOf(zz as (typeof ZHI)[number]));
+  const palaces = ZHI.map((branch, i) => ({
+    branch,
+    name: CETIAN_PALACE[(i - zi + 12) % 12],
+    star: CETIAN[(zi + i) % CETIAN.length],
+    isYear: i === zi,
+  }));
   return {
     yanqin: {
       year: ANIMALS[zi],
@@ -315,6 +326,7 @@ export function computeMingOther(b: BirthInput): MingOtherResult {
     cetian: {
       star: CETIAN[zi % CETIAN.length],
       note: "策天飞星以年支入局，看飞宫与四化。",
+      palaces,
     },
   };
 }

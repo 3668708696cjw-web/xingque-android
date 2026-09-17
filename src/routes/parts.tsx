@@ -2,7 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
 import { NatalWheel } from "@/components/natal-wheel";
+import { AcgWorldMap, TermsBelt, ViewBar } from "@/components/chart-kit";
 import { Block, Chip, Ghost, Meta, Screen, Workbench } from "@/components/kit";
+import { viewsOf } from "@/lib/horosa/catalog";
 import { computeParts } from "@/lib/horosa/parts";
 import { computeAcg, computeDraconic, computeHarmonic, throwDice, type DiceResult } from "@/lib/horosa/modules";
 import { computeHorary } from "@/lib/horosa/horary";
@@ -10,11 +12,11 @@ import { useChartStore } from "@/lib/horosa/store";
 
 export const Route = createFileRoute("/parts")({ component: Page });
 
-const TABS = ["点", "谐波", "龙盘", "卜卦", "ACG", "骰子"] as const;
+const VIEWS = viewsOf("/parts");
 
 function Page() {
   const draft = useChartStore((s) => s.draft);
-  const [tab, setTab] = useState<(typeof TABS)[number]>("点");
+  const [tab, setTab] = useState(VIEWS[0] ?? "福点");
   const [harm, setHarm] = useState(2);
   const [dice, setDice] = useState<DiceResult | null>(null);
   const parts = useMemo(() => computeParts(draft), [draft]);
@@ -24,8 +26,10 @@ function Page() {
   const acg = useMemo(() => computeAcg(draft), [draft]);
 
   const canvas =
-    tab === "点" ? (
+    tab === "福点" ? (
       <NatalWheel chart={parts.natal} modern={false} />
+    ) : tab === "埃及界限" ? (
+      <TermsBelt chart={parts.natal} />
     ) : tab === "谐波" ? (
       <div>
         <div className="-ml-3 mb-2 flex flex-wrap">
@@ -53,31 +57,12 @@ function Page() {
           <NatalWheel chart={horary.natal} modern={false} />
         </div>
       </div>
-    ) : tab === "ACG" ? (
+    ) : tab === "ACG 地图" ? (
       <div>
         <Meta>行星 MC 线地理经度（赤经近似）</Meta>
-        <svg viewBox="0 0 360 80" className="mt-4 w-full text-ink" aria-label="ACG 经线">
-          <rect x="0" y="20" width="360" height="40" fill="currentColor" opacity="0.06" />
-          {[-180, -90, 0, 90, 180].map((x) => (
-            <g key={x}>
-              <line x1={x + 180} y1="20" x2={x + 180} y2="60" stroke="currentColor" strokeWidth="0.6" opacity="0.35" />
-              <text x={x + 180} y="74" textAnchor="middle" fill="currentColor" fontSize="7" opacity="0.6">
-                {x}°
-              </text>
-            </g>
-          ))}
-          {acg.map((l, i) => {
-            const x = ((l.lon + 180) % 360 + 360) % 360;
-            return (
-              <g key={l.planet}>
-                <line x1={x} y1="18" x2={x} y2="62" stroke="currentColor" strokeWidth="1.2" className="text-cinnabar" />
-                <text x={x} y={12 + (i % 2) * 6} textAnchor="middle" fill="currentColor" fontSize="7">
-                  {l.planet}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
+        <div className="mt-3">
+          <AcgWorldMap lines={acg} />
+        </div>
         <ul className="mt-4 text-sm">
           {acg.map((l) => (
             <li key={l.planet} className="flex justify-between border-b border-line py-2">
@@ -107,18 +92,12 @@ function Page() {
         params={<BirthPanel />}
         canvas={
           <div>
-            <div className="-ml-3 mb-3 flex flex-wrap">
-              {TABS.map((t) => (
-                <Chip key={t} active={tab === t} onClick={() => setTab(t)}>
-                  {t}
-                </Chip>
-              ))}
-            </div>
+            <ViewBar views={VIEWS} value={tab} onChange={setTab} />
             {canvas}
           </div>
         }
         panel={
-          tab === "点" ? (
+          tab === "福点" || tab === "埃及界限" ? (
             <div>
               <Block title="阿拉伯点">
                 {parts.lots.map((l) => (
@@ -155,7 +134,7 @@ function Page() {
             </div>
           ) : (
             <p className="text-sm leading-7 text-muted">
-              辅盘对应 Windows「卜卦、谐波、龙盘、中点、ACG」。汉堡九十度盘见「汉堡」。
+              辅盘对应 Windows「卜卦、谐波、龙盘、中点、ACG、埃及界限」。汉堡九十度盘见「汉堡」。
             </p>
           )
         }

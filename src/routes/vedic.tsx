@@ -1,19 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
-import { NatalWheel } from "@/components/natal-wheel";
+import { NatalWheel, type WheelStyle } from "@/components/natal-wheel";
+import { EraStrip, NakshatraBoard, ViewBar } from "@/components/chart-kit";
 import { Interpret, Meta, PanelSections, Screen, Workbench } from "@/components/kit";
-import { computeVedic } from "@/lib/horosa/vedic";
+import { viewsOf } from "@/lib/horosa/catalog";
+import { NAK, NAK_EN, computeVedic } from "@/lib/horosa/vedic";
 import { useChartStore } from "@/lib/horosa/store";
 import { visiblePlanets } from "@/lib/horosa/natal";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/vedic")({ component: Page });
 
+const VIEWS = viewsOf("/vedic");
+const STYLE_OF: Record<string, WheelStyle> = { 北印: "north", 南印: "south", 东印: "east" };
+
 function Page() {
   const draft = useChartStore((s) => s.draft);
   const data = useMemo(() => computeVedic(draft), [draft]);
   const planets = visiblePlanets(data.natal, false);
+  const [view, setView] = useState(VIEWS[0] ?? "北印");
+  const style = STYLE_OF[view] ?? "north";
+  const labels = NAK.map((name, i) => ({ name, en: NAK_EN[i] }));
+  const placements = planets.map((p) => ({
+    glyph: p.glyph,
+    name: p.name,
+    nak: data.nak[p.key]?.en ?? "",
+  }));
+
   return (
     <Screen title="印占">
       <Workbench
@@ -23,8 +37,24 @@ function Page() {
             <Meta>
               Lahiri {data.natal.ayanamsa.toFixed(3)}° · 月宿 {data.moonNak.en} 第{data.moonNak.pada}足
             </Meta>
+            <ViewBar views={VIEWS} value={view} onChange={setView} />
             <div className="mt-3">
-              <NatalWheel chart={data.natal} modern={false} style="north" />
+              {view === "D9 九分" ? (
+                <NatalWheel chart={data.navamsa} modern={false} style="south" />
+              ) : view === "月宿" ? (
+                <NakshatraBoard labels={labels} current={data.moonNak.en} placements={placements} />
+              ) : view === "达沙" ? (
+                <EraStrip
+                  items={data.dasha.map((d) => ({
+                    lord: d.lord,
+                    fromAge: d.fromAge,
+                    toAge: d.toAge,
+                    current: d.current,
+                  }))}
+                />
+              ) : (
+                <NatalWheel chart={data.natal} modern={false} style={style} />
+              )}
             </div>
           </div>
         }

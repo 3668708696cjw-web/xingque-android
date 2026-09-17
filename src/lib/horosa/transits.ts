@@ -103,6 +103,17 @@ export function computeTransits(b: BirthInput): TransitResult {
   };
 }
 
+export function solarArcChart(natal: NatalChart, solarArc: { name: string; lon: number; dms: string }[]): NatalChart {
+  const map = Object.fromEntries(solarArc.map((x) => [x.name, x]));
+  return {
+    ...natal,
+    planets: natal.planets.map((p) => {
+      const hit = map[p.name];
+      return hit ? { ...p, lon: hit.lon, dms: hit.dms } : p;
+    }),
+  };
+}
+
 function norm360(x: number) {
   return ((x % 360) + 360) % 360;
 }

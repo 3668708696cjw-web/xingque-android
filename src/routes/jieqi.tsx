@@ -2,17 +2,21 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
 import { NatalWheel } from "@/components/natal-wheel";
-import { Chip, Meta, Screen, Workbench } from "@/components/kit";
+import { ViewBar } from "@/components/chart-kit";
+import { Meta, Screen, Workbench } from "@/components/kit";
+import { viewsOf } from "@/lib/horosa/catalog";
 import { computeJieqi } from "@/lib/horosa/modules";
 import { useChartStore } from "@/lib/horosa/store";
 
 export const Route = createFileRoute("/jieqi")({ component: Page });
 
+const VIEWS = viewsOf("/jieqi");
+
 function Page() {
   const draft = useChartStore((s) => s.draft);
   const charts = useMemo(() => computeJieqi(draft), [draft]);
-  const [i, setI] = useState(0);
-  const cur = charts[i] ?? charts[0];
+  const [view, setView] = useState(VIEWS[0] ?? "春分");
+  const cur = charts.find((c) => c.name === view) ?? charts[0];
   return (
     <Screen title="分至">
       <Workbench
@@ -20,13 +24,7 @@ function Page() {
         canvas={
           cur ? (
             <div>
-              <div className="-ml-3 mb-2 flex flex-wrap">
-                {charts.map((c, n) => (
-                  <Chip key={c.name} active={n === i} onClick={() => setI(n)}>
-                    {c.name}
-                  </Chip>
-                ))}
-              </div>
+              <ViewBar views={VIEWS} value={view} onChange={setView} />
               <Meta>
                 {cur.name} {cur.date} 午时
               </Meta>

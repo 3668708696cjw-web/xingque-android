@@ -1,53 +1,44 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { Chip, Ghost, Interpret, Screen, Workbench } from "@/components/kit";
-import { drawSpread, type Drawn } from "@/lib/horosa/tarot";
+import { useMemo, useState } from "react";
+import { ViewBar } from "@/components/chart-kit";
+import { Ghost, Interpret, Screen, Workbench } from "@/components/kit";
+import { TarotFace } from "@/components/tech-boards";
+import { viewsOf } from "@/lib/horosa/catalog";
+import { drawLenormand, drawSpread } from "@/lib/horosa/tarot";
+import { useChartStore } from "@/lib/horosa/store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/tarot")({ component: Page });
 
-function CardFace({ c }: { c: Drawn }) {
-  return (
-    <article className="min-w-0">
-      <p className="mb-2 text-[11px] tracking-wide text-muted">{c.pos}</p>
-      <div
-        className={cn(
-          "aspect-[2/3] border border-line bg-surface p-4",
-          c.flipped && "rotate-180",
-        )}
-      >
-        <p className="text-[10px] tracking-widest text-faint">{c.suit}</p>
-        <p className="mt-6 font-display text-[22px] leading-tight">{c.name}</p>
-        <div className="mt-6 h-px bg-line" />
-        <p className="mt-4 text-xs leading-5 text-muted">{c.flipped ? c.meaningR : c.meaningU}</p>
-      </div>
-    </article>
-  );
-}
+const VIEWS = viewsOf("/tarot");
 
 function Page() {
-  const [kind, setKind] = useState<"three" | "five">("three");
-  const [cards, setCards] = useState<Drawn[]>([]);
+  const draft = useChartStore((s) => s.draft);
+  const [view, setView] = useState(VIEWS[0] ?? "伟特");
+  const [nudge, setNudge] = useState(0);
+  const seed = draft.year * 10000 + draft.month * 100 + draft.day + draft.hour + nudge * 41;
+  const cards = useMemo(() => {
+    if (view === "雷诺曼") return drawLenormand(seed);
+    if (view === "五张") return drawSpread("five", seed);
+    return drawSpread("three", seed);
+  }, [view, seed]);
+  const deck = view === "雷诺曼" ? "雷诺曼" : "塔罗";
   return (
     <Screen title="塔罗">
       <Workbench
         params={
           <div>
-            <div className="-ml-3 flex">
-              <Chip active={kind === "three"} onClick={() => setKind("three")}>
-                三张
-              </Chip>
-              <Chip active={kind === "five"} onClick={() => setKind("five")}>
-                五张
-              </Chip>
-            </div>
-            <Ghost type="button" className="mt-4" onClick={() => setCards(drawSpread(kind))}>
-              抽牌
+            <p className="text-sm leading-7 text-muted">
+              {view === "雷诺曼" ? "三十六张雷诺曼。过去、现在、出路。" : view === "五张" ? "伟特五张：现状到出路。" : "伟特七十八张。本机抽牌，不上传。"}
+            </p>
+            <Ghost type="button" className="mt-6" onClick={() => setNudge((n) => n + 1)}>
+              再抽
             </Ghost>
           </div>
         }
         canvas={
-          cards.length ? (
+          <div>
+            <ViewBar views={VIEWS} value={view} onChange={setView} />
             <div
               className={cn(
                 "grid gap-4",
@@ -55,31 +46,22 @@ function Page() {
               )}
             >
               {cards.map((c) => (
-                <CardFace key={c.pos} c={c} />
+                <TarotFace key={c.pos + c.id} c={c} />
               ))}
             </div>
-          ) : (
-            <p className="text-sm text-muted">抽牌后牌阵铺在中间。正逆与牌义写在右侧。</p>
-          )
+          </div>
         }
         panel={
-          cards.length ? (
-            <div className="space-y-4">
-              {cards.map((c) => (
-                <p key={c.pos} className="text-sm leading-7">
-                  <span className="text-muted">{c.pos} · </span>
-                  {c.name}
-                  {c.flipped ? "（逆）" : ""}：{c.flipped ? c.meaningR : c.meaningU}
-                </p>
-              ))}
-              <Interpret
-                kind="塔罗"
-                summary={cards.map((c) => `${c.pos}:${c.name}${c.flipped ? "逆" : "正"}`).join(" ")}
-              />
-            </div>
-          ) : (
-            <p className="text-sm text-muted">伟特牌义，本机抽牌，不上传。</p>
-          )
+          <div className="space-y-4">
+            {cards.map((c) => (
+              <p key={c.pos} className="text-sm leading-7">
+                <span className="text-muted">{c.pos} · </span>
+                {c.name}
+                {c.flipped ? "（逆）" : ""}：{c.flipped ? c.meaningR : c.meaningU}
+              </p>
+            ))}
+            <Interpret kind={deck} summary={cards.map((c) => `${c.pos}:${c.name}${c.flipped ? "逆" : "正"}`).join(" ")} />
+          </div>
         }
       />
     </Screen>

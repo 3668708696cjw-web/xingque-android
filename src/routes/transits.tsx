@@ -1,31 +1,74 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
 import { NatalWheel } from "@/components/natal-wheel";
-import { Interpret, Meta, PanelSections, Screen, Workbench } from "@/components/kit";
-import { computeTransits } from "@/lib/horosa/transits";
+import { DecennialStrip, FirdariaStrip, ReleasingRing, ViewBar } from "@/components/chart-kit";
+import { Interpret, Meta, PanelSections, Screen, Workbench, useHydrated } from "@/components/kit";
+import { ProfectionWheel } from "@/components/tech-boards";
+import { viewsOf } from "@/lib/horosa/catalog";
+import { computeTransits, solarArcChart } from "@/lib/horosa/transits";
 import { useChartStore } from "@/lib/horosa/store";
 import { formatDMS } from "@/lib/horosa/types";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/transits")({ component: Page });
 
+const VIEWS = viewsOf("/transits");
+
 function Page() {
+  const ready = useHydrated();
   const draft = useChartStore((s) => s.draft);
-  const data = useMemo(() => computeTransits(draft), [draft]);
-  const zr1 = data.releasing.filter((r) => r.level === 1);
-  const zr2 = data.releasing.filter((r) => r.level === 2);
+  const data = useMemo(() => (ready ? computeTransits(draft) : null), [draft, ready]);
+  const [view, setView] = useState(VIEWS[0] ?? "过运双轮");
+  const zr1 = data?.releasing.filter((r) => r.level === 1) ?? [];
+  const zr2 = data?.releasing.filter((r) => r.level === 2) ?? [];
+  const arc = useMemo(
+    () => (data ? solarArcChart(data.natal, data.solarArc) : null),
+    [data],
+  );
+  if (!data) {
+    return (
+      <Screen title="星运">
+        <Workbench params={<BirthPanel />} canvas={<p className="text-sm text-muted">载入…</p>} panel={null} />
+      </Screen>
+    );
+  }
   return (
     <Screen title="星运">
       <Workbench
         params={<BirthPanel />}
         canvas={
           <div>
+            <ViewBar views={VIEWS} value={view} onChange={setView} />
             <Meta>
-              内轮本命 · 外轮此刻 · {data.age} 岁 · 小限 {data.profection}
+              {view === "过运双轮"
+                ? `内轮本命 · 外轮此刻 · ${data.age} 岁 · 小限 ${data.profection}`
+                : view === "日返"
+                  ? "今年太阳返照"
+                  : view === "月返"
+                    ? "本月太阴返照"
+                    : view === "推进"
+                      ? `日换年推进，第 ${data.age} 日`
+                      : view === "小限"
+                        ? `岁次宫 ${data.profection}`
+                        : view === "法达"
+                          ? "波斯法达，日生/夜生序列"
+                          : view === "十年"
+                            ? "十年主，十年一换"
+                            : view === "黄道星释"
+                              ? "黄道星释一级"
+                              : `太阳弧 ${data.age}°`}
             </Meta>
             <div className="mt-3">
-              <NatalWheel chart={data.natal} outer={data.now} />
+              {view === "过运双轮" ? <NatalWheel chart={data.natal} outer={data.now} /> : null}
+              {view === "日返" ? <NatalWheel chart={data.solarReturn} modern={false} /> : null}
+              {view === "月返" ? <NatalWheel chart={data.lunarReturn} modern={false} /> : null}
+              {view === "推进" ? <NatalWheel chart={data.progressed} outer={data.natal} modern={false} /> : null}
+              {view === "小限" ? <ProfectionWheel age={data.age} current={data.profection} /> : null}
+              {view === "法达" ? <FirdariaStrip items={data.firdaria} /> : null}
+              {view === "十年" ? <DecennialStrip items={data.decennials} /> : null}
+              {view === "黄道星释" ? <ReleasingRing items={data.releasing} /> : null}
+              {view === "太阳弧" && arc ? <NatalWheel chart={data.natal} outer={arc} modern={false} /> : null}
             </div>
           </div>
         }

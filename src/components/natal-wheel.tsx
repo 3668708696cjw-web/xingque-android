@@ -1,8 +1,9 @@
 import { SIGNS, type NatalChart, type PlanetKey, type PlanetPos, visiblePlanets } from "@/lib/horosa/natal";
+import { cn } from "@/lib/utils";
 
 function polar(cx: number, cy: number, r: number, deg: number) {
   const t = ((deg - 180) * Math.PI) / 180;
-  return { x: cx + r * Math.cos(t), y: cy + r * Math.sin(t) };
+  return { x: Math.round((cx + r * Math.cos(t)) * 10) / 10, y: Math.round((cy + r * Math.sin(t)) * 10) / 10 };
 }
 
 function arc(cx: number, cy: number, r1: number, r2: number, a0: number, a1: number) {
@@ -81,7 +82,7 @@ function aspectStyle(typeZh: string) {
   return { stroke: "var(--color-ink)", op: 0.5, dash: undefined, w: 1.35 };
 }
 
-export type WheelStyle = "wheel" | "north" | "square";
+export type WheelStyle = "wheel" | "north" | "square" | "south" | "greek" | "east";
 
 export function NatalWheel({
   chart,
@@ -100,6 +101,9 @@ export function NatalWheel({
 }) {
   if (style === "north") return <NorthIndian chart={chart} modern={modern} minors={minors} onSelect={onSelect} />;
   if (style === "square") return <SquareChart chart={chart} modern={modern} minors={minors} onSelect={onSelect} />;
+  if (style === "south") return <SouthIndian chart={chart} modern={modern} minors={minors} onSelect={onSelect} />;
+  if (style === "greek") return <Hellenistic chart={chart} modern={modern} minors={minors} onSelect={onSelect} />;
+  if (style === "east") return <EastIndian chart={chart} modern={modern} minors={minors} onSelect={onSelect} />;
   return <RoundWheel chart={chart} outer={outer} modern={modern} minors={minors} onSelect={onSelect} />;
 }
 
@@ -457,6 +461,208 @@ function SquareChart({
         );
       })}
     </svg>
+  );
+}
+
+function planetsByWhole(chart: NatalChart, modern: boolean, minors: boolean) {
+  const planets = visiblePlanets(chart, modern, minors);
+  const byHouse: PlanetPos[][] = Array.from({ length: 12 }, () => []);
+  planets.forEach((p) => byHouse[houseOfWhole(p.lon, chart.asc) - 1].push(p));
+  return { planets, byHouse, ascSign: Math.floor(chart.asc / 30) };
+}
+
+function SouthIndian({
+  chart,
+  modern,
+  minors = true,
+}: {
+  chart: NatalChart;
+  modern: boolean;
+  minors?: boolean;
+  onSelect?: (key: PlanetKey) => void;
+}) {
+  const { byHouse, ascSign } = planetsByWhole(chart, modern, minors);
+  const cells: { sign: number; col: number; row: number }[] = [
+    { sign: 11, col: 1, row: 1 },
+    { sign: 0, col: 2, row: 1 },
+    { sign: 1, col: 3, row: 1 },
+    { sign: 2, col: 4, row: 1 },
+    { sign: 10, col: 1, row: 2 },
+    { sign: 3, col: 4, row: 2 },
+    { sign: 9, col: 1, row: 3 },
+    { sign: 4, col: 4, row: 3 },
+    { sign: 8, col: 1, row: 4 },
+    { sign: 7, col: 2, row: 4 },
+    { sign: 6, col: 3, row: 4 },
+    { sign: 5, col: 4, row: 4 },
+  ];
+  return (
+    <div className="chart-stage">
+      <div className="si-board" aria-label="南印度盘">
+        {cells.map((c) => {
+          const house = ((c.sign - ascSign + 12) % 12) + 1;
+          const s = SIGNS[c.sign];
+          const list = byHouse[house - 1];
+          return (
+            <div
+              key={c.sign}
+              className={cn("si-cell", house === 1 && "is-lagna")}
+              style={{ gridColumn: c.col, gridRow: c.row }}
+            >
+              <div className="si-head">
+                <span>
+                  {s.glyph} {s.name}
+                </span>
+                <span>{house}</span>
+              </div>
+              <div className="si-body">
+                {list.map((p) => (
+                  <span key={p.key}>
+                    {p.glyph}
+                    {p.retro ? "R" : ""}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+        <div className="si-center">
+          <p className="font-display text-xl">南印</p>
+          <p className="mt-1 text-xs text-muted">星座固定 · 宫随升</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EastIndian({
+  chart,
+  modern,
+  minors = true,
+}: {
+  chart: NatalChart;
+  modern: boolean;
+  minors?: boolean;
+  onSelect?: (key: PlanetKey) => void;
+}) {
+  const { byHouse, ascSign } = planetsByWhole(chart, modern, minors);
+  const cells: { house: number; col: number; row: number }[] = [
+    { house: 12, col: 1, row: 1 },
+    { house: 1, col: 2, row: 1 },
+    { house: 2, col: 3, row: 1 },
+    { house: 3, col: 4, row: 1 },
+    { house: 11, col: 1, row: 2 },
+    { house: 4, col: 4, row: 2 },
+    { house: 10, col: 1, row: 3 },
+    { house: 5, col: 4, row: 3 },
+    { house: 9, col: 1, row: 4 },
+    { house: 8, col: 2, row: 4 },
+    { house: 7, col: 3, row: 4 },
+    { house: 6, col: 4, row: 4 },
+  ];
+  return (
+    <div className="chart-stage">
+      <div className="si-board" aria-label="东印度盘">
+        {cells.map((c) => {
+          const sign = (ascSign + c.house - 1) % 12;
+          const s = SIGNS[sign];
+          const list = byHouse[c.house - 1];
+          return (
+            <div
+              key={c.house}
+              className={cn("si-cell", c.house === 1 && "is-lagna")}
+              style={{ gridColumn: c.col, gridRow: c.row }}
+            >
+              <div className="si-head">
+                <span>{c.house}宫</span>
+                <span>
+                  {s.glyph} {s.name}
+                </span>
+              </div>
+              <div className="si-body">
+                {list.map((p) => (
+                  <span key={p.key}>
+                    {p.glyph}
+                    {p.retro ? "R" : ""}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+        <div className="si-center">
+          <p className="font-display text-xl">东印</p>
+          <p className="mt-1 text-xs text-muted">宫位固定 · 星座随升</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Hellenistic({
+  chart,
+  modern,
+  minors = true,
+}: {
+  chart: NatalChart;
+  modern: boolean;
+  minors?: boolean;
+  onSelect?: (key: PlanetKey) => void;
+}) {
+  const planets = visiblePlanets(chart, modern, minors);
+  const byHouse: PlanetPos[][] = Array.from({ length: 12 }, () => []);
+  planets.forEach((p) => byHouse[p.house - 1].push(p));
+  const cells: { h: number; col: string; row: string }[] = [
+    { h: 12, col: "1", row: "1" },
+    { h: 11, col: "2", row: "1" },
+    { h: 10, col: "3", row: "1" },
+    { h: 9, col: "4", row: "1" },
+    { h: 1, col: "1", row: "2" },
+    { h: 8, col: "4", row: "2" },
+    { h: 2, col: "1", row: "3" },
+    { h: 7, col: "4", row: "3" },
+    { h: 3, col: "1", row: "4" },
+    { h: 4, col: "2", row: "4" },
+    { h: 5, col: "3", row: "4" },
+    { h: 6, col: "4", row: "4" },
+  ];
+  return (
+    <div className="chart-stage">
+      <div className="gr-board" aria-label="希腊盘">
+        {cells.map((c) => {
+          const list = byHouse[c.h - 1];
+          const cusp = chart.houses[c.h - 1];
+          const sign = SIGNS[Math.floor(norm360(cusp) / 30)];
+          const axis = c.h === 1 || c.h === 4 || c.h === 7 || c.h === 10;
+          return (
+            <div
+              key={c.h}
+              className={cn("gr-cell", c.h === 1 && "is-asc", axis && "is-axis")}
+              style={{ gridColumn: c.col, gridRow: c.row }}
+            >
+              <div className="gr-head">
+                <span>
+                  {c.h} {sign.glyph}
+                </span>
+                <span>{sign.name}</span>
+              </div>
+              <div className="gr-body">
+                {list.map((p) => (
+                  <span key={p.key}>
+                    {p.glyph}
+                    {p.retro ? "R" : ""} {Math.floor(norm360(p.lon) % 30)}°
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+        <div className="gr-center">
+          <p className="font-display text-xl">希腊</p>
+          <p className="mt-1 text-xs text-muted">1 宫居左</p>
+        </div>
+      </div>
+    </div>
   );
 }
 

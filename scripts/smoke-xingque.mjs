@@ -36,18 +36,18 @@ for (const r of routes) {
 
 // click 文献 tab
 await page.goto(base + '/history', { waitUntil: 'networkidle' });
-const tab = page.getByRole('button', { name: '文献' });
+const tab = page.getByRole('button', { name: '词条百科', exact: true });
 if (await tab.count()) {
   await tab.click();
   await page.waitForTimeout(200);
   const t = await page.innerText('body');
-  if (!t.includes('天官书') && !t.includes('灵宪') && !t.includes('文献')) {
-    fails.push('history 文献 tab missing classics');
+  if (!t.includes('词条') && !t.includes('百科') && !t.includes('天官')) {
+    fails.push('history 词条百科 tab missing');
   } else {
-    console.log('文献 tab ok, snippet:', t.slice(0, 120).replace(/\s+/g, ' '));
+    console.log('词条百科 tab ok, snippet:', t.slice(0, 120).replace(/\s+/g, ' '));
   }
 } else {
-  fails.push('no 文献 button');
+  fails.push('no 词条百科 button');
 }
 
 // natal compute visible

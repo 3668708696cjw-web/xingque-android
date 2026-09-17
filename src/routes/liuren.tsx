@@ -1,33 +1,37 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
 import { LiurenBoard } from "@/components/boards";
+import { ViewBar } from "@/components/chart-kit";
 import { Interpret, Meta, PanelSections, Screen, Workbench } from "@/components/kit";
+import { viewsOf } from "@/lib/horosa/catalog";
 import { computeLiuren } from "@/lib/horosa/liuren";
 import { useChartStore } from "@/lib/horosa/store";
 import { ZHI } from "@/lib/horosa/types";
 
 export const Route = createFileRoute("/liuren")({ component: Page });
 
+const VIEWS = viewsOf("/liuren");
+
 function Page() {
   const draft = useChartStore((s) => s.draft);
   const data = useMemo(() => computeLiuren(draft), [draft]);
+  const [view, setView] = useState(VIEWS[0] ?? "天地盘");
   return (
     <Screen title="六壬">
       <Workbench
         params={<BirthPanel submitLabel="排盘" />}
         canvas={
           <div>
-            <Meta>
-              {data.ganzhi} · 月将{data.yuejiang} · {data.jieqi} · {data.method}
-            </Meta>
-            <div className="mt-4">
-              <LiurenBoard data={data} />
-            </div>
+            <ViewBar views={VIEWS} value={view} onChange={setView} />
+            <LiurenBoard data={data} view={view} />
           </div>
         }
         panel={
           <div>
+            <Meta>
+              {data.ganzhi} · 月将{data.yuejiang} · {data.jieqi} · {data.method}
+            </Meta>
             <PanelSections
               sections={[
                 {

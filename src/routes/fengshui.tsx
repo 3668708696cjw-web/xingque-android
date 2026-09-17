@@ -1,17 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
 import { FengshuiLuopan } from "@/components/boards";
+import { BazhaiBoard, ViewBar } from "@/components/chart-kit";
 import { Fold, Meta, Screen, Workbench } from "@/components/kit";
+import { FengshuiBagui } from "@/components/tech-boards";
+import { viewsOf } from "@/lib/horosa/catalog";
 import { computeFengshui } from "@/lib/horosa/fengshui";
 import { useChartStore } from "@/lib/horosa/store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/fengshui")({ component: Page });
 
+const VIEWS = viewsOf("/fengshui");
+
 function Page() {
   const draft = useChartStore((s) => s.draft);
   const data = useMemo(() => computeFengshui(draft), [draft]);
+  const [view, setView] = useState(VIEWS[0] ?? "飞星九宫");
   return (
     <Screen title="风水">
       <Workbench
@@ -21,7 +27,16 @@ function Page() {
             <Meta>
               {data.mingGua}卦 · {data.group} · {data.yuan}
             </Meta>
-            <FengshuiLuopan data={data} />
+            <ViewBar views={VIEWS} value={view} onChange={setView} />
+            <div className="mt-3">
+              {view === "罗盘" ? (
+                <FengshuiLuopan data={data} />
+              ) : view === "八宅" || view === "大游年" ? (
+                <BazhaiBoard mingGua={data.mingGua} group={data.group} sitting={data.sitting} title={view} />
+              ) : (
+                <FengshuiBagui data={data} />
+              )}
+            </div>
           </div>
         }
         panel={

@@ -32,6 +32,42 @@ export function synastryHits(a: NatalChart, b: NatalChart, orbMax = 4): SynHit[]
   return out.sort((x, y) => x.orb - y.orb).slice(0, 28);
 }
 
+export function houseIn(lon: number, houses: number[]): number {
+  const n = ((lon % 360) + 360) % 360;
+  for (let i = 0; i < 12; i++) {
+    const a = houses[i];
+    const b = houses[(i + 1) % 12];
+    const span = ((b - a + 360) % 360) || 30;
+    const d = (n - a + 360) % 360;
+    if (d < span) return i + 1;
+  }
+  return 1;
+}
+
+export function influenceHouses(host: NatalChart, guest: NatalChart): { house: number; lines: string[] }[] {
+  const cells = Array.from({ length: 12 }, (_, i) => ({ house: i + 1, lines: [] as string[] }));
+  visiblePlanets(guest, false).forEach((p) => {
+    const h = houseIn(p.lon, host.houses);
+    cells[h - 1].lines.push(`${p.glyph}${p.name}${p.retro ? "R" : ""}`);
+  });
+  return cells;
+}
+
+export type MarcusHit = { t: string; house: number; angular: boolean };
+
+export function marcusHits(a: NatalChart, b: NatalChart): MarcusHit[] {
+  const out: MarcusHit[] = [];
+  visiblePlanets(a, false).forEach((p) => {
+    const h = houseIn(p.lon, b.houses);
+    out.push({ t: `甲${p.name}入乙${h}宫`, house: h, angular: [1, 4, 7, 10].includes(h) });
+  });
+  visiblePlanets(b, false).forEach((p) => {
+    const h = houseIn(p.lon, a.houses);
+    out.push({ t: `乙${p.name}入甲${h}宫`, house: h, angular: [1, 4, 7, 10].includes(h) });
+  });
+  return out.sort((x, y) => Number(y.angular) - Number(x.angular) || x.house - y.house);
+}
+
 export function computeComposite(a: NatalChart, b: NatalChart): NatalChart {
   const planets = a.planets.map((p) => {
     const q = b.planets.find((x) => x.key === p.key);

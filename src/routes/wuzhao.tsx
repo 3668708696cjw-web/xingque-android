@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { BirthPanel } from "@/components/birth-form";
 import { Interpret, Meta, Screen, Workbench } from "@/components/kit";
 import { ResultHero } from "@/components/ops";
+import { WuZhaoBoard } from "@/components/tech-boards";
 import { computeWuZhao } from "@/lib/horosa/modules";
 import { useChartStore } from "@/lib/horosa/store";
 import { cn } from "@/lib/utils";
@@ -27,15 +28,8 @@ function Page() {
         canvas={
           <div>
             <Meta>{data.method}</Meta>
-            <div className="mt-6 grid grid-cols-5 gap-px bg-line">
-              {ALL.map((z) => (
-                <div
-                  key={z.name}
-                  className={cn("bg-bg py-6 text-center", z.name === data.name && "outline outline-1 outline-ink outline-offset-[-1px]")}
-                >
-                  <p className="font-display text-3xl">{z.name}</p>
-                </div>
-              ))}
+            <div className="mt-6">
+              <WuZhaoBoard data={data} />
             </div>
             <div className="mt-10">
               <ResultHero title={data.name} note={data.note} />

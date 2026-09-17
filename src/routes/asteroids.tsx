@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
+import { AsteroidRing } from "@/components/tech-boards";
 import { Block, Chip, Field, FieldInput, Meta, Primary, Screen, Workbench } from "@/components/kit";
+import { computeNatal } from "@/lib/horosa/natal";
 import {
   computeFamousAsteroids,
   computeOneAsteroid,
@@ -54,6 +56,7 @@ function Page() {
       .filter((x) => !ql || x.name.toLowerCase().includes(ql) || String(x.n).includes(ql))
       .slice(0, 80);
   }, [cat, q]);
+  const natal = useMemo(() => computeNatal(draft), [draft]);
 
   async function pick(n: number) {
     setBusy(true);
@@ -87,6 +90,9 @@ function Page() {
               谷神族随包可用。编号星需导入星历包，装入后断网也能算。
               {busy ? " · 计算中" : ""}
             </Meta>
+            <div className="mt-3">
+              <AsteroidRing natal={natal} rows={extra ? [...rows, extra] : rows} />
+            </div>
             <ul className="mt-6">
               {rows.map((r) => (
                 <li key={r.n} className="flex justify-between gap-3 border-b border-line py-2.5 text-sm">

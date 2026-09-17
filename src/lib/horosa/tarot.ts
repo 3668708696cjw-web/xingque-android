@@ -101,3 +101,62 @@ export function drawSpread(kind: "three" | "five", seed?: number): Drawn[] {
   const pos = SPREADS[kind];
   return pos.map((p, i) => ({ ...bag[i], flipped: rnd() < 0.42, pos: p }));
 }
+
+const LENO: [string, string][] = [
+  ["骑士", "消息将至"],
+  ["三叶草", "小幸运"],
+  ["船", "出行、远方"],
+  ["家", "根基、宅"],
+  ["树", "健康、长线"],
+  ["云", "不明、反复"],
+  ["蛇", "纠缠、智计"],
+  ["棺", "结束、放下"],
+  ["花束", "礼物、美事"],
+  ["镰刀", "斩断、收割"],
+  ["鞭", "口舌、重复"],
+  ["鸟", "闲话、焦虑"],
+  ["小孩", "新、单纯"],
+  ["狐狸", "算计、职场"],
+  ["熊", "权威、保护"],
+  ["星", "希望、方向"],
+  ["鹳", "迁徙、变化"],
+  ["狗", "忠诚、友人"],
+  ["塔", "机构、孤立"],
+  ["花园", "社交、公开"],
+  ["山", "阻碍、延迟"],
+  ["路", "选择、分叉"],
+  ["鼠", "损耗、忧"],
+  ["心", "感情、真诚"],
+  ["环", "契约、循环"],
+  ["书", "秘密、学习"],
+  ["信", "文书、通知"],
+  ["男人", "问事男方"],
+  ["女人", "问事女方"],
+  ["百合", "长辈、清贵"],
+  ["太阳", "成功、显"],
+  ["月亮", "名声、情绪"],
+  ["钥匙", "打开、关键"],
+  ["鱼", "钱、流通"],
+  ["锚", "稳定、工作"],
+  ["十字", "命运、考验"],
+];
+
+export function drawLenormand(seed?: number): Drawn[] {
+  let s = (seed ?? Date.now()) >>> 0;
+  const rnd = () => {
+    s = Math.imul(s ^ (s >>> 16), 0x45d9f3b);
+    return ((s >>> 0) % 1000) / 1000;
+  };
+  const bag = LENO.map(([name, meaningU], i) => ({
+    id: 200 + i,
+    name,
+    suit: "雷诺曼",
+    meaningU,
+    meaningR: meaningU,
+  }));
+  for (let i = bag.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [bag[i], bag[j]] = [bag[j], bag[i]];
+  }
+  return ["过去", "现在", "出路"].map((pos, i) => ({ ...bag[i], flipped: false, pos }));
+}

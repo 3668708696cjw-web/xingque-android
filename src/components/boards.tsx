@@ -187,7 +187,7 @@ const QM_FACE: Record<number, string> = {
   6: "qm-face-tl",
 };
 
-export function QimenBoard({ data }: { data: QimenResult }) {
+export function QimenBoard({ data, showGeju }: { data: QimenResult; showGeju?: boolean }) {
   const by = Object.fromEntries(data.cells.map((c) => [c.palace, c]));
   return (
     <div className="chart-stage">
@@ -207,6 +207,7 @@ export function QimenBoard({ data }: { data: QimenResult }) {
               </div>
             );
           }
+          const tag = showGeju ? c.geju.find((g) => g !== "空亡" && g !== "三奇") : undefined;
           return (
             <div
               key={n}
@@ -229,8 +230,8 @@ export function QimenBoard({ data }: { data: QimenResult }) {
                 {c.name}
                 {c.kong ? " 空" : ""}
                 {c.ma ? " 马" : ""}
-                {c.menpo ? " 迫" : ""}
               </span>
+              {tag ? <span className="qm-geju">{tag}</span> : null}
             </div>
           );
         })}
@@ -278,6 +279,12 @@ export function ZiweiBoard({ data }: { data: ZiweiResult }) {
                   {s.brightness ? <b>{s.brightness}</b> : null}
                 </div>
               ))}
+              {p.minors.length ? (
+                <div className="zw-minors">{p.minors.slice(0, 6).join(" ")}</div>
+              ) : null}
+              {p.adjectives.length ? (
+                <div className="zw-adj">{p.adjectives.slice(0, 4).join(" ")}</div>
+              ) : null}
             </div>
             <div className="zw-foot">
               <span className="zw-gz">
@@ -311,19 +318,37 @@ export function ZiweiBoard({ data }: { data: ZiweiResult }) {
   );
 }
 
-export function LiuyaoBoard({ data }: { data: LiuYaoResult }) {
+export function LiuyaoBoard({ data, view = "本卦" }: { data: LiuYaoResult; view?: string }) {
   const lines = [...data.lines].reverse();
   const change = [...data.changeLines].reverse();
-  return (
-    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-      <div>
-        <p className="mb-3 text-[11px] tracking-wide text-muted">本卦 {data.name}</p>
-        <YaoLines lines={lines} />
-      </div>
+  if (view === "变卦") {
+    return (
       <div>
         <p className="mb-3 text-[11px] tracking-wide text-muted">变卦 {data.changeName}</p>
-        <YaoLines lines={change} mute />
+        <YaoLines lines={change} />
       </div>
+    );
+  }
+  if (view === "世应") {
+    return (
+      <div>
+        <p className="mb-3 text-[11px] tracking-wide text-muted">本卦 {data.name}</p>
+        <YaoLines lines={lines} emphasize="shi" />
+      </div>
+    );
+  }
+  if (view === "六神") {
+    return (
+      <div>
+        <p className="mb-3 text-[11px] tracking-wide text-muted">本卦 {data.name}</p>
+        <YaoLines lines={lines} emphasize="shen" />
+      </div>
+    );
+  }
+  return (
+    <div>
+      <p className="mb-3 text-[11px] tracking-wide text-muted">本卦 {data.name}</p>
+      <YaoLines lines={lines} />
     </div>
   );
 }
@@ -331,15 +356,19 @@ export function LiuyaoBoard({ data }: { data: LiuYaoResult }) {
 function YaoLines({
   lines,
   mute,
+  emphasize,
 }: {
   lines: LiuYaoResult["lines"];
   mute?: boolean;
+  emphasize?: "shi" | "shen";
 }) {
   return (
     <div className="space-y-3">
       {lines.map((l) => (
         <div key={l.pos} className="flex items-center gap-3">
-          <span className="w-8 text-[11px] text-cinnabar">{l.shi ? "世" : l.ying ? "应" : ""}</span>
+          <span className={cn("w-10 text-[11px] text-cinnabar", emphasize === "shi" && "font-display text-base")}>
+            {emphasize === "shen" ? l.shen : l.shi ? "世" : l.ying ? "应" : ""}
+          </span>
           <div className={cn("flex-1", mute && "opacity-55")}>
             {l.yang ? (
               <div className={cn("h-1 bg-ink", l.changing && "bg-cinnabar")} />
@@ -351,8 +380,9 @@ function YaoLines({
             )}
           </div>
           <span className="w-36 text-right text-xs text-muted">
-            {l.shen} {l.qin} {l.najia}
+            {emphasize === "shen" ? `${l.qin} ${l.najia}` : `${l.shen} ${l.qin} ${l.najia}`}
             {l.changing ? " 动" : ""}
+            {l.fu ? ` 伏${l.fu}` : ""}
           </span>
         </div>
       ))}
@@ -360,18 +390,24 @@ function YaoLines({
   );
 }
 
-function lrPolar(cx: number, cy: number, r: number, i: number) {
-  const t = ((i - 6) * 30 - 90) * (Math.PI / 180);
-  return { x: cx + r * Math.cos(t), y: cy + r * Math.sin(t) };
+function r1(n: number) {
+  return Math.round(n * 10) / 10;
 }
 
-export function LiurenBoard({ data }: { data: LiuRenResult }) {
+function lrPolar(cx: number, cy: number, r: number, i: number) {
+  const t = ((i - 6) * 30 - 90) * (Math.PI / 180);
+  return { x: r1(cx + r * Math.cos(t)), y: r1(cy + r * Math.sin(t)) };
+}
+
+export function LiurenBoard({ data, view = "天地盘" }: { data: LiuRenResult; view?: string }) {
+  if (view === "四课") return <LiurenSike data={data} />;
+  if (view === "三传") return <LiurenSan data={data} />;
   const size = 480;
   const cx = size / 2;
   const cy = size / 2;
   return (
     <div>
-      <svg viewBox={`0 0 ${size} ${size}`} className="mx-auto block w-full max-w-[520px] text-ink lg:max-w-none">
+      <svg viewBox={`0 0 ${size} ${size}`} className="chart-svg mx-auto max-w-[520px] text-ink" aria-label="六壬天地盘">
         <circle cx={cx} cy={cy} r={226} fill="var(--color-surface)" stroke="currentColor" strokeOpacity={0.28} />
         <circle cx={cx} cy={cy} r={168} fill="none" stroke="currentColor" strokeOpacity={0.16} />
         <circle cx={cx} cy={cy} r={110} fill="none" stroke="currentColor" strokeOpacity={0.14} />
@@ -403,16 +439,38 @@ export function LiurenBoard({ data }: { data: LiuRenResult }) {
           {data.method}
         </text>
       </svg>
-      <div className="mt-6 grid grid-cols-4 gap-2 text-center">
-        {data.sik.map((k) => (
-          <div key={k.name} className="border-b border-line pb-2">
-            <div className="text-[10px] text-muted">{k.name}</div>
-            <div className="font-display text-2xl">{k.upper}</div>
-            <div className="text-xs text-muted">{k.lower}</div>
+    </div>
+  );
+}
+
+export function LiurenSike({ data }: { data: LiuRenResult }) {
+  return (
+    <div className="lr-sike">
+      {data.sik.map((k) => (
+        <div key={k.name} className="lr-sike-cell">
+          <p className="text-[11px] tracking-wide text-muted">{k.name}</p>
+          <p className="mt-3 font-display text-5xl leading-none">{k.upper}</p>
+          <p className="mt-3 text-sm text-muted">{k.lower}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function LiurenSan({ data }: { data: LiuRenResult }) {
+  const labels = ["初传", "中传", "末传"];
+  return (
+    <div>
+      <div className="lr-san">
+        {data.san.map((z, i) => (
+          <div key={labels[i]} className="lr-san-cell">
+            <p className="text-[11px] tracking-wide text-muted">{labels[i]}</p>
+            <p className="mt-4 font-display text-6xl leading-none">{z}</p>
+            <p className="mt-3 text-sm text-muted">{data.generals[z] ?? ""}</p>
           </div>
         ))}
       </div>
-      <p className="mt-5 text-center font-display text-2xl tracking-[0.4em]">{data.san.join(" ")}</p>
+      <p className="mt-6 text-center text-sm text-muted">{data.method}</p>
     </div>
   );
 }
@@ -458,8 +516,8 @@ export function FengshuiLuopan({ data }: { data: FengshuiResult }) {
       {dirs.map((d) => {
         const t = ((d.a - 90) * Math.PI) / 180;
         const lucky = data.lucky.includes(d.name);
-        const x = cx + Math.cos(t) * 158;
-        const y = cy + Math.sin(t) * 158;
+        const x = r1(cx + Math.cos(t) * 158);
+        const y = r1(cy + Math.sin(t) * 158);
         const sit = data.sitting.find((s) => s.name === d.name);
         return (
           <g key={d.name}>

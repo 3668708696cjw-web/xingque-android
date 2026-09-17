@@ -1,30 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
-import { TaiyiBoard } from "@/components/boards";
+import { ViewBar } from "@/components/chart-kit";
+import { TaiyiJinian, TaiyiPalaceBoard } from "@/components/tech-boards";
 import { Fold, Interpret, Meta, Screen, Workbench } from "@/components/kit";
+import { viewsOf } from "@/lib/horosa/catalog";
 import { computeTaiyi } from "@/lib/horosa/taiyi";
 import { useChartStore } from "@/lib/horosa/store";
 
 export const Route = createFileRoute("/taiyi")({ component: Page });
 
+const VIEWS = viewsOf("/taiyi");
+
 function Page() {
   const draft = useChartStore((s) => s.draft);
   const data = useMemo(() => computeTaiyi(draft), [draft]);
+  const [view, setView] = useState(VIEWS[0] ?? "九宫");
   return (
     <Screen title="太乙">
       <Workbench
         params={<BirthPanel submitLabel="入局" />}
         canvas={
           <div>
-            <Meta>{data.note}</Meta>
-            <div className="mt-5">
-              <TaiyiBoard data={data} />
-            </div>
+            <ViewBar views={VIEWS} value={view} onChange={setView} />
+            {view === "十六神" ? (
+              <TaiyiPalaceBoard data={data} mode="sixteen" />
+            ) : view === "积年" ? (
+              <TaiyiJinian data={data} />
+            ) : (
+              <TaiyiPalaceBoard data={data} mode="key" />
+            )}
           </div>
         }
         panel={
           <div>
+            <Meta>{data.note}</Meta>
             <Fold title="九宫" defaultOpen>
               <ul className="text-sm leading-7 text-muted">
                 {data.cells.map((c) => (

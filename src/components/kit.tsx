@@ -19,8 +19,8 @@ export function Screen({
 }) {
   const [jump, setJump] = useState(false);
   return (
-    <div className="mx-auto w-full px-4 pb-10 pt-2 md:px-6 md:pt-4">
-      <header className="mb-2 flex items-center gap-1">
+    <div className="mx-auto w-full px-5 pb-16 pt-3 md:px-8 md:pt-6">
+      <header className="mb-1 flex items-center gap-1">
         <button
           type="button"
           className="flex size-11 shrink-0 items-center justify-center text-ink transition-transform duration-150 ease-out active:scale-[0.96] md:hidden"
@@ -32,7 +32,7 @@ export function Screen({
         >
           <ChevronLeft className="size-6" strokeWidth={1.5} />
         </button>
-        <h1 className="font-display text-[1.375rem] font-medium leading-tight tracking-tight md:text-2xl">{title}</h1>
+        <h1 className="font-display text-[1.25rem] font-medium leading-tight tracking-tight md:text-[1.75rem]">{title}</h1>
         <div className="ml-auto flex shrink-0 items-center">
           <button
             type="button"
@@ -55,13 +55,13 @@ function DraftStrip() {
   const draft = useChartStore((s) => s.draft);
   const setNow = useChartStore((s) => s.setNow);
   return (
-    <div className="mb-4 flex min-h-11 items-baseline justify-between gap-3 border-b border-line pb-3">
+    <div className="mb-6 flex h-10 items-center justify-between gap-3 border-b border-line">
       <p className="min-w-0 truncate text-sm">
         <span className="font-display">{draft.name || cityOf(draft).name}</span>
         <span className="ml-2 tabular-nums text-muted">{birthLabel(draft)}</span>
-        <span className="ml-2 text-faint">{cityOf(draft).name}</span>
+        <span className="ml-2 hidden text-faint sm:inline">{cityOf(draft).name}</span>
       </p>
-      <button type="button" className="h-11 shrink-0 px-2 text-sm text-cinnabar" onClick={setNow}>
+      <button type="button" className="h-10 shrink-0 px-2 text-sm text-cinnabar" onClick={setNow}>
         此刻
       </button>
     </div>
@@ -326,11 +326,13 @@ export function QuietTabs({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="-mx-1 mb-4 flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="view-bar" role="tablist">
       {tabs.map((t) => (
         <button
           key={t}
           type="button"
+          role="tab"
+          aria-selected={value === t}
           onClick={() => onChange(t)}
           className={cn(
             "h-11 shrink-0 border-b px-3.5 text-sm",

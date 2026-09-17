@@ -15,7 +15,7 @@ const QUICK = [
   { to: "/natal", name: "占星" },
   { to: "/bazi", name: "八字" },
   { to: "/ziwei", name: "紫微" },
-  { to: "/qimen", name: "奇门" },
+  { to: "/qimen", name: "遁甲" },
   { to: "/liuyao", name: "六爻" },
   { to: "/almanac", name: "黄历" },
 ] as const;
@@ -40,47 +40,43 @@ function Home() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-5 pb-16 pt-8 md:px-8 md:pt-12">
-      <p className="text-xs tracking-wide text-muted">星阙 · 本地离线</p>
-      <h1 className="mt-2 font-display text-4xl font-medium tracking-tight md:text-5xl">
+    <main className="mx-auto max-w-3xl px-6 pb-24 pt-12 md:px-8 md:pt-16">
+      <p className="text-[11px] tracking-[0.28em] text-muted">星阙 · 本地离线</p>
+      <h1 className="mt-4 font-display text-5xl font-medium tracking-tight md:text-6xl">
         {now.getMonth() + 1} 月 {now.getDate()} 日
       </h1>
-      <p className="mt-3 text-[15px] leading-7 text-muted">
+      <p className="mt-5 max-w-md text-[15px] leading-8 text-muted">
         星期{a.week} · {a.lunar}
         <br />
         {a.ganzhi} · {a.zhixing}日
       </p>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-3 text-sm text-muted">
         宜 {a.yi.slice(0, 3).join("、") || "—"} · 忌 {a.ji.slice(0, 2).join("、") || "—"}
       </p>
 
-      <div className="mt-8 space-y-3">
+      <div className="mt-12 max-w-sm">
         <Primary type="button" onClick={() => goNow("/natal")}>
           看此刻的盘
         </Primary>
-        <div className="grid grid-cols-3 gap-2">
+        <nav className="mt-6 flex flex-wrap gap-x-6 gap-y-3">
           {QUICK.map((q) => (
-            <Link
-              key={q.to}
-              to={q.to}
-              className="flex h-12 items-center justify-center rounded-md text-sm text-ink"
-            >
+            <Link key={q.to} to={q.to} className="text-sm text-ink">
               {q.name}
             </Link>
           ))}
-        </div>
+        </nav>
       </div>
 
       {charts.length ? (
-        <section className="mt-12">
-          <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="text-xs tracking-wide text-muted">最近命例</h2>
+        <section className="mt-16">
+          <div className="mb-2 flex items-baseline justify-between">
+            <h2 className="text-[11px] tracking-[0.2em] text-muted">最近命例</h2>
             <Link to="/me" className="text-xs text-cinnabar">
               全部
             </Link>
           </div>
           <ul>
-            {charts.slice(0, 6).map((c) => (
+            {charts.slice(0, 5).map((c) => (
               <li key={c.id} className="border-b border-line">
                 <button
                   type="button"
@@ -98,27 +94,23 @@ function Home() {
           </ul>
         </section>
       ) : (
-        <p className="mt-10 text-sm leading-7 text-muted">还没有保存的命例。点「看此刻的盘」，或到排盘里填出生时间。</p>
+        <p className="mt-14 max-w-md text-sm leading-7 text-muted">还没有保存的命例。点「看此刻的盘」，或到排盘里填出生时间。</p>
       )}
 
-      <div className="mt-12 grid gap-3 sm:grid-cols-2">
-        <Link to="/almanac" className="rounded-lg border border-line p-5">
-          <p className="text-xs tracking-wide text-muted">通书</p>
-          <p className="mt-2 font-display text-xl">黄历</p>
-          <p className="mt-2 text-sm text-muted">
-            {a.zhixing}日 · 宜 {a.yi[0]}
-          </p>
+      <section className="mt-16 space-y-4 text-sm leading-7">
+        <Link to="/almanac" className="block">
+          <span className="text-[11px] tracking-[0.2em] text-muted">通书</span>
+          <span className="mt-1 block font-display text-xl">黄历 · {a.zhixing}日</span>
         </Link>
-        <Link to="/history" className="rounded-lg border border-line p-5">
-          <p className="text-xs tracking-wide text-muted">馆</p>
-          <p className="mt-2 font-display text-xl">玄学史</p>
-          <p className="mt-2 text-sm leading-6 text-muted">{daily.name}</p>
+        <Link to="/history" className="block">
+          <span className="text-[11px] tracking-[0.2em] text-muted">馆</span>
+          <span className="mt-1 block font-display text-xl">玄学史 · {daily.name}</span>
         </Link>
-      </div>
+      </section>
 
       {sky ? (
-        <section className="mt-12">
-          <p className="mb-4 text-xs tracking-wide text-muted">此刻天象</p>
+        <section className="mt-16">
+          <p className="mb-5 text-[11px] tracking-[0.2em] text-muted">此刻天象</p>
           <div className="chart-stage">
             <NatalWheel chart={sky} modern={false} />
           </div>

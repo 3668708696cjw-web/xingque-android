@@ -48,6 +48,7 @@ import { Route as VedicRouteImport } from './routes/vedic'
 import { Route as WuzhaoRouteImport } from './routes/wuzhao'
 import { Route as XiaochengRouteImport } from './routes/xiaocheng'
 import { Route as XiaoliurenRouteImport } from './routes/xiaoliuren'
+import { Route as XiuRouteImport } from './routes/xiu'
 import { Route as ZeriRouteImport } from './routes/zeri'
 import { Route as ZiweiRouteImport } from './routes/ziwei'
 import { Route as HistoryIdRouteImport } from './routes/history.$id'
@@ -247,6 +248,11 @@ const XiaoliurenRoute = XiaoliurenRouteImport.update({
   path: '/xiaoliuren',
   getParentRoute: () => rootRouteImport,
 } as any)
+const XiuRoute = XiuRouteImport.update({
+  id: '/xiu',
+  path: '/xiu',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ZeriRoute = ZeriRouteImport.update({
   id: '/zeri',
   path: '/zeri',
@@ -303,6 +309,7 @@ export interface FileRoutesByFullPath {
   '/wuzhao': typeof WuzhaoRoute
   '/xiaocheng': typeof XiaochengRoute
   '/xiaoliuren': typeof XiaoliurenRoute
+  '/xiu': typeof XiuRoute
   '/zeri': typeof ZeriRoute
   '/ziwei': typeof ZiweiRoute
   '/history/$id': typeof HistoryIdRoute
@@ -347,6 +354,7 @@ export interface FileRoutesByTo {
   '/wuzhao': typeof WuzhaoRoute
   '/xiaocheng': typeof XiaochengRoute
   '/xiaoliuren': typeof XiaoliurenRoute
+  '/xiu': typeof XiuRoute
   '/zeri': typeof ZeriRoute
   '/ziwei': typeof ZiweiRoute
   '/history/$id': typeof HistoryIdRoute
@@ -392,6 +400,7 @@ export interface FileRoutesById {
   '/wuzhao': typeof WuzhaoRoute
   '/xiaocheng': typeof XiaochengRoute
   '/xiaoliuren': typeof XiaoliurenRoute
+  '/xiu': typeof XiuRoute
   '/zeri': typeof ZeriRoute
   '/ziwei': typeof ZiweiRoute
   '/history/$id': typeof HistoryIdRoute
@@ -438,6 +447,7 @@ export interface FileRouteTypes {
     | '/wuzhao'
     | '/xiaocheng'
     | '/xiaoliuren'
+    | '/xiu'
     | '/zeri'
     | '/ziwei'
     | '/history/$id'
@@ -482,6 +492,7 @@ export interface FileRouteTypes {
     | '/wuzhao'
     | '/xiaocheng'
     | '/xiaoliuren'
+    | '/xiu'
     | '/zeri'
     | '/ziwei'
     | '/history/$id'
@@ -526,6 +537,7 @@ export interface FileRouteTypes {
     | '/wuzhao'
     | '/xiaocheng'
     | '/xiaoliuren'
+    | '/xiu'
     | '/zeri'
     | '/ziwei'
     | '/history/$id'
@@ -571,6 +583,7 @@ export interface RootRouteChildren {
   WuzhaoRoute: typeof WuzhaoRoute
   XiaochengRoute: typeof XiaochengRoute
   XiaoliurenRoute: typeof XiaoliurenRoute
+  XiuRoute: typeof XiuRoute
   ZeriRoute: typeof ZeriRoute
   ZiweiRoute: typeof ZiweiRoute
 }
@@ -850,6 +863,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof XiaoliurenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/xiu': {
+      id: '/xiu'
+      path: '/xiu'
+      fullPath: '/xiu'
+      preLoaderRoute: typeof XiuRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/zeri': {
       id: '/zeri'
       path: '/zeri'
@@ -925,6 +945,7 @@ const rootRouteChildren: RootRouteChildren = {
   WuzhaoRoute: WuzhaoRoute,
   XiaochengRoute: XiaochengRoute,
   XiaoliurenRoute: XiaoliurenRoute,
+  XiuRoute: XiuRoute,
   ZeriRoute: ZeriRoute,
   ZiweiRoute: ZiweiRoute,
 }

@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
 import { NatalWheel } from "@/components/natal-wheel";
-import { Block, Meta, Screen, Workbench } from "@/components/kit";
+import { UranianDial } from "@/components/tech-boards";
+import { Block, Chip, Meta, Screen, Workbench } from "@/components/kit";
 import { computeUranian } from "@/lib/horosa/uranian";
 import { useChartStore } from "@/lib/horosa/store";
 
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/uranian")({ component: Page });
 function Page() {
   const draft = useChartStore((s) => s.draft);
   const u = useMemo(() => computeUranian(draft), [draft]);
+  const [view, setView] = useState<"dial" | "wheel">("dial");
 
   return (
     <Screen title="汉堡">
@@ -18,7 +20,11 @@ function Page() {
         params={<BirthPanel />}
         canvas={
           <div>
-            <NatalWheel chart={u.natal} modern />
+            <div className="-ml-3 mb-2 flex flex-wrap">
+              <Chip active={view === "dial"} onClick={() => setView("dial")}>九十度</Chip>
+              <Chip active={view === "wheel"} onClick={() => setView("wheel")}>本命</Chip>
+            </div>
+            {view === "dial" ? <UranianDial data={u} /> : <NatalWheel chart={u.natal} modern />}
             <Meta>九十度盘：黄经模 90。中点与本命、升顶、八颗天王星同盘。</Meta>
           </div>
         }

@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
 import { BaziBoard } from "@/components/boards";
-import { Interpret, Meta, PanelSections, Screen, Workbench } from "@/components/kit";
+import { EraStrip, ViewBar } from "@/components/chart-kit";
+import { Bar, Interpret, Meta, PanelSections, Screen, Workbench } from "@/components/kit";
+import { viewsOf } from "@/lib/horosa/catalog";
 import { computeBazi } from "@/lib/horosa/bazi";
 import { useChartStore } from "@/lib/horosa/store";
 import { shiShen, wxClass } from "@/lib/horosa/types";
@@ -10,9 +12,12 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/bazi")({ component: Page });
 
+const VIEWS = viewsOf("/bazi");
+
 function Page() {
   const draft = useChartStore((s) => s.draft);
   const data = useMemo(() => computeBazi(draft), [draft]);
+  const [view, setView] = useState(VIEWS[0] ?? "四柱");
   return (
     <Screen title="八字">
       <Workbench
@@ -26,8 +31,54 @@ function Page() {
               胎元 {data.taiyuan} · 命宫 {data.minggong} · 身宫 {data.shengong} · 用神{data.yongshen} 喜{data.xishen}{" "}
               忌{data.jishen}
             </p>
-            <div className="mt-5">
-              <BaziBoard data={data} />
+            <ViewBar views={VIEWS} value={view} onChange={setView} />
+            <div className="mt-4">
+              {view === "大运" ? (
+                <EraStrip
+                  items={data.dayun.map((y) => ({
+                    lord: y.ganzhi,
+                    fromAge: y.startAge,
+                    toAge: y.endAge,
+                    current: y.current,
+                  }))}
+                />
+              ) : view === "流年" ? (
+                <EraStrip
+                  items={data.liunian.map((y) => ({
+                    lord: `${y.ganzhi}`,
+                    fromAge: y.age,
+                    toAge: y.age + 1,
+                    current: y.current,
+                  }))}
+                />
+              ) : view === "神煞" ? (
+                data.shensha.length ? (
+                  <ul className="grid grid-cols-2 gap-px bg-line sm:grid-cols-3">
+                    {data.shensha.map((s, i) => (
+                      <li key={s.name + i} className="bg-bg px-3 py-4">
+                        <p className="font-display text-lg">{s.name}</p>
+                        <p className="mt-1 text-xs text-muted">{s.at}柱</p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted">常见神煞未入四柱。</p>
+                )
+              ) : view === "格局" ? (
+                <div>
+                  <p className="font-display text-3xl">{data.geju}</p>
+                  <p className="mt-2 text-sm text-muted">
+                    日主{data.dayMaster} · {data.strength} · 用{data.yongshen}
+                  </p>
+                  <div className="mt-6 space-y-2">
+                    {Object.entries(data.scores).map(([k, v]) => (
+                      <Bar key={k} label={k} value={v} max={Math.max(...Object.values(data.scores), 1)} />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <BaziBoard data={data} />
+              )}
             </div>
           </div>
         }

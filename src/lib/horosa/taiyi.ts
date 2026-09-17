@@ -4,7 +4,12 @@ const PALACE = ["", "坎", "坤", "震", "巽", "中", "乾", "兑", "艮", "离
 const MEN = ["", "休门", "死门", "伤门", "杜门", "死门", "开门", "惊门", "生门", "景门"];
 const SHEN16 = ["地主", "阳德", "和德", "吕申", "高丛", "太阳", "大灵", "大神", "大威", "天道", "大武", "武德", "太簇", "阴主", "阴德", "大义"];
 
+function mod9(n: number) {
+  return ((n % 9) + 9) % 9;
+}
+
 export type TaiyiCell = { palace: number; name: string; stars: string[]; men: string };
+export type TaiyiSixteenGod = { name: string; palace: number };
 export type TaiyiResult = {
   jinian: number;
   ju: number;
@@ -16,6 +21,7 @@ export type TaiyiResult = {
   shiji: number;
   heshen: string;
   cells: TaiyiCell[];
+  sixteen: TaiyiSixteenGod[];
   note: string;
 };
 
@@ -50,7 +56,12 @@ export function computeTaiyi(b: BirthInput): TaiyiResult {
   place("客参将", ((ju + 6) % 9) + 1);
   place("定计大将", ((ju + 2) % 9) + 1);
   place("计神", jishen);
-  SHEN16.forEach((s, i) => place(s, skip5(((muPalace - 1 + (yang ? i : -i) + 9) % 9) + 1)));
+
+  const sixteen: TaiyiSixteenGod[] = SHEN16.map((s, i) => {
+    const palace = skip5(mod9(muPalace - 1 + (yang ? i : -i)) + 1);
+    place(s, palace);
+    return { name: s, palace };
+  });
 
   const heshen = SHEN16[(jinian - 1) % 16];
 
@@ -65,6 +76,7 @@ export function computeTaiyi(b: BirthInput): TaiyiResult {
     shiji,
     heshen,
     cells,
+    sixteen,
     note: `太乙积年 ${jinian}，${yang ? "阳" : "阴"}${ju}局 · ${yuan}。天乙在${PALACE[muPalace]}，计神在${PALACE[skip5(jishen)]}，合神${heshen}。`,
   };
 }

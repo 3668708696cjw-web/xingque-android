@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
 import { Kv, ResultHero } from "@/components/ops";
 import { QuietTabs, Screen, Workbench } from "@/components/kit";
+import { HeluoLuoShu, HexagramBars, MeihuaBoard, YanqinWheel, YizhangPalm } from "@/components/tech-boards";
+import { computeLiuyaoTime, GUA64 } from "@/lib/horosa/liuyao";
 import { computeShushu } from "@/lib/horosa/shushu";
 import { useChartStore } from "@/lib/horosa/store";
 
@@ -13,7 +15,9 @@ const TABS = ["皇极", "梅花", "河洛", "铁板", "神易", "演禽"] as con
 function Page() {
   const draft = useChartStore((s) => s.draft);
   const data = useMemo(() => computeShushu(draft), [draft]);
+  const meihua = useMemo(() => computeLiuyaoTime(draft), [draft]);
   const [tab, setTab] = useState<(typeof TABS)[number]>("皇极");
+  const shenyiBits = (data.shenyi.number - 1) & 63;
   return (
     <Screen title="数算">
       <Workbench
@@ -34,12 +38,17 @@ function Page() {
               </div>
             ) : null}
             {tab === "梅花" ? (
-              <ResultHero kicker={data.meihua.method} title={data.meihua.name} note={`变 ${data.meihua.changeName}`} />
+              <div>
+                <ResultHero kicker={data.meihua.method} title={data.meihua.name} note={`变 ${data.meihua.changeName}`} />
+                <div className="mt-6">
+                  <MeihuaBoard data={meihua} />
+                </div>
+              </div>
             ) : null}
             {tab === "河洛" ? (
               <div>
-                <ResultHero kicker="河洛理数" title={String(data.heluo.xiantian)} note={data.heluo.note} />
-                <div className="mt-8">
+                <HeluoLuoShu xiantian={data.heluo.xiantian % 9 || 9} houtian={data.heluo.houtian % 9 || 9} />
+                <div className="mt-6">
                   <Kv k="先天" v={String(data.heluo.xiantian)} />
                   <Kv k="后天" v={String(data.heluo.houtian)} />
                   <Kv k="合数" v={data.heluo.he} />
@@ -50,25 +59,23 @@ function Page() {
               <ResultHero kicker={`铁板神数 第 ${data.tieban.no} 数`} title={`第 ${data.tieban.no}`} note={data.tieban.ci} />
             ) : null}
             {tab === "神易" ? (
-              <ResultHero kicker={`第 ${data.shenyi.number} 卦`} title={data.shenyi.gua} note={data.shenyi.note} />
+              <div>
+                <ResultHero kicker={`第 ${data.shenyi.number} 卦`} title={data.shenyi.gua} note={data.shenyi.note} />
+                <div className="mt-6 max-w-sm">
+                  <HexagramBars
+                    lines={[0, 1, 2, 3, 4, 5].map((i) => ({ yang: ((shenyiBits >> i) & 1) === 1 }))}
+                    title={GUA64[shenyiBits] ?? data.shenyi.gua}
+                  />
+                </div>
+              </div>
             ) : null}
             {tab === "演禽" ? (
               <div>
-                <div className="grid grid-cols-4 gap-3 text-center">
-                  {[
-                    ["年", data.yanqin.year],
-                    ["月", data.yanqin.month],
-                    ["日", data.yanqin.day],
-                    ["时", data.yanqin.hour],
-                  ].map(([k, v]) => (
-                    <div key={k}>
-                      <p className="text-[11px] text-muted">{k}</p>
-                      <p className="mt-2 font-display text-4xl">{v}</p>
-                    </div>
-                  ))}
-                </div>
+                <YanqinWheel year={data.yanqin.year} month={data.yanqin.month} day={data.yanqin.day} hour={data.yanqin.hour} />
                 <p className="mt-6 text-sm leading-7 text-muted">{data.yanqin.note}</p>
-                <p className="mt-4 text-sm text-muted">一掌经 {data.yizhang.palm}宫 · {data.yizhang.note}</p>
+                <div className="mt-4">
+                  <YizhangPalm palace={data.yizhang.palm} />
+                </div>
               </div>
             ) : null}
           </div>
