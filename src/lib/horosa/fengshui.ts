@@ -15,6 +15,12 @@ const DIRS: { name: string; gua: string; luoshu: number }[] = [
 const BAZHAI_EAST = { 生气: "震", 天医: "离", 延年: "巽", 伏位: "坎", 五鬼: "艮", 六煞: "坤", 祸害: "兑", 绝命: "乾" };
 const BAZHAI_WEST = { 生气: "兑", 天医: "坤", 延年: "乾", 伏位: "艮", 五鬼: "坎", 六煞: "离", 祸害: "震", 绝命: "巽" };
 
+export type FengshuiSchool = {
+  name: string;
+  kind: string;
+  note: string;
+};
+
 export type FengshuiResult = {
   mingGua: string;
   group: "东四命" | "西四命";
@@ -24,6 +30,8 @@ export type FengshuiResult = {
   unlucky: string[];
   sitting: { name: string; kind: string; note: string }[];
   feixing: { palace: string; star: number }[];
+  sanhe: { changsheng: string; water: string; note: string };
+  schools: FengshuiSchool[];
 };
 
 function digitSum(n: number) {
@@ -75,5 +83,29 @@ export function computeFengshui(b: BirthInput): FengshuiResult {
     star: ((yun - 1 + i) % 9) + 1,
   }));
   void order;
-  return { mingGua, group, yuan, yun, lucky, unlucky, sitting, feixing };
+  const zhi = ["寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥", "子", "丑"][(b.month + 10) % 12];
+  const changshengMap: Record<string, string> = {
+    木: "亥",
+    火: "寅",
+    土: "寅",
+    金: "巳",
+    水: "申",
+  };
+  const wx = EAST.has(mingGua) ? "木" : "金";
+  const sanhe = {
+    changsheng: changshengMap[wx],
+    water: zhi,
+    note: `三合以${wx}长生在${changshengMap[wx]}，水口看${zhi}方。`,
+  };
+  const schools: FengshuiSchool[] = [
+    { name: "八宅", kind: group, note: `命卦${mingGua}，东四/西四对宫而用。` },
+    { name: "玄空飞星", kind: `${yun}运`, note: "按下元运飞紫白，看向盘与山盘。" },
+    { name: "三合", kind: sanhe.changsheng, note: sanhe.note },
+    { name: "三元", kind: yuan, note: "上下元各六十年，九运一转。" },
+    { name: "杨公", kind: "形势", note: "看龙、砂、水、向四字，峦头为体。" },
+    { name: "金锁玉关", kind: "过路阴阳", note: "门、路、灶三白为用，以形气入宅。" },
+    { name: "九星", kind: "贪巨禄文廉武破辅弼", note: "与紫白同源，贪巨武为吉。" },
+    { name: "大游年", kind: sitting[0]?.kind ?? "", note: "从门上起游年，与八宅同宫。" },
+  ];
+  return { mingGua, group, yuan, yun, lucky, unlucky, sitting, feixing, sanhe, schools };
 }

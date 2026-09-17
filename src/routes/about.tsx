@@ -15,9 +15,9 @@ function About() {
       </p>
       <p className="mt-6 text-[14px] leading-7 text-muted">
         源流：郑大哥创建星阙，荀爽（Herakleios）公开 App 与 Web。Windows
-        整合版见 Horace-Maxwell 仓库。历法用 lunar-javascript，紫微用 iztro，行星用 astronomy-engine。奇门、六壬、太乙等为时家常法的精简实现，不作专业鉴定。
+        整合版见 Horace-Maxwell 仓库。历法用 lunar-javascript，紫微用 iztro，行星优先 Swiss Ephemeris（本机 se1 / JPL），缺文件时回落 astronomy-engine。奇门、六壬、太乙等为时家常法的精简实现，不作专业鉴定。
       </p>
-      <p className="mt-6 text-[13px] text-faint">开源许可以原项目为准。本应用为学习与查阅用途。</p>
+      <p className="mt-6 text-[13px] text-faint">版本 4.0 · Swiss 星历约 1.8 GB 随包。开源许可以原项目为准。本应用为学习与查阅用途。</p>
     </Screen>
   );
 }

@@ -1,7 +1,7 @@
 import { Solar } from "lunar-javascript";
 import { almanacOf } from "./almanac";
 import { lunarOf } from "./calendar";
-import { getCity } from "./cities";
+import { cityOf } from "./cities";
 import { computeNatal, type NatalChart } from "./natal";
 import { computeQimen } from "./qimen";
 import { GAN, ZHI, formatDMS, type BirthInput } from "./types";
@@ -261,7 +261,7 @@ export type AcgLine = { planet: string; lon: number; note: string };
 
 export function computeAcg(b: BirthInput): AcgLine[] {
   const natal = computeNatal(b);
-  const city = getCity(b.cityId);
+  const city = cityOf(b);
   return natal.planets
     .filter((p) => !p.modern)
     .map((p) => {

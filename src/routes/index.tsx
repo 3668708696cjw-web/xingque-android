@@ -33,7 +33,7 @@ function Home() {
         <Link to="/catalog" className="xs-card min-h-[9.5rem]">
           <p className="xs-eye">命 · 卜</p>
           <div className="mt-3 font-display text-2xl">排盘</div>
-          <p className="mt-2 text-sm leading-6 text-muted">二十六门技法，本机起盘。</p>
+          <p className="mt-2 text-sm leading-6 text-muted">三十七门技法，本机起盘。</p>
         </Link>
         <Link to="/history" className="xs-card min-h-[9.5rem]">
           <p className="xs-eye">馆</p>

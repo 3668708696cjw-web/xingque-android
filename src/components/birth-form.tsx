@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CITIES, getCity, wallClock } from "@/lib/horosa/cities";
+import { CITIES, cityOf, wallClock } from "@/lib/horosa/cities";
 import { useChartStore } from "@/lib/horosa/store";
 import { birthLabel, pad2, type Gender } from "@/lib/horosa/types";
 import { Chip, Field, FieldInput, FieldSelect, Fold, Primary, useHydrated } from "./kit";
@@ -122,7 +122,7 @@ function BirthFields({
         </FieldSelect>
       </Field>
       <p className="text-xs text-faint">
-        {getCity(draft.cityId).name} · {getCity(draft.cityId).lat.toFixed(2)}°N {getCity(draft.cityId).lon.toFixed(2)}°E
+        {cityOf(draft).name} · {cityOf(draft).lat.toFixed(2)}° {cityOf(draft).lon.toFixed(2)}°
       </p>
       <Primary type="submit">{submitLabel}并保存</Primary>
       {saved ? <p className="text-xs text-cinnabar">{saved}</p> : null}
@@ -154,7 +154,7 @@ export function BirthForm({
         onClick={() => setOpen(true)}
         className="flex min-h-12 w-full items-baseline justify-between gap-3 border-b border-line py-3 text-left"
       >
-        <span className="font-display text-base">{draft.name || getCity(draft.cityId).name}</span>
+        <span className="font-display text-base">{draft.name || cityOf(draft).name}</span>
         <span className="shrink-0 text-xs text-muted">{birthLabel(draft)} · 改</span>
       </button>
     );
@@ -235,9 +235,9 @@ function MobileBirthSheet({ submitLabel, onSubmit }: { submitLabel: string; onSu
     <>
       <div className="flex min-h-12 items-center justify-between gap-3 border-b border-line py-3">
         <button type="button" onClick={() => setOpen(true)} className="min-w-0 flex-1 text-left">
-          <span className="block truncate font-display text-base">{draft.name || getCity(draft.cityId).name}</span>
+          <span className="block truncate font-display text-base">{draft.name || cityOf(draft).name}</span>
           <span className="mt-0.5 block text-[11px] text-muted">
-            {birthLabel(draft)} · {getCity(draft.cityId).name} · {draft.gender === "male" ? "男" : "女"}
+            {birthLabel(draft)} · {cityOf(draft).name} · {draft.gender === "male" ? "男" : "女"}
           </span>
         </button>
         <button type="button" className="h-11 shrink-0 px-2 text-[13px] text-cinnabar" onClick={setNow}>

@@ -1,21 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
-import { Screen, Workbench } from "@/components/kit";
-import { computeZeri } from "@/lib/horosa/modules";
+import { useMemo, useState } from "react";
+import { Chip, Screen, Workbench } from "@/components/kit";
+import { ZERI_TECHS, computeZeriDesk, type ZeriTech } from "@/lib/horosa/zeri";
 import { useChartStore } from "@/lib/horosa/store";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/zeri")({ component: Page });
 
 function Page() {
-  const cityId = useChartStore((s) => s.draft.cityId);
-  const days = useMemo(() => computeZeri(cityId), [cityId]);
+  const draft = useChartStore((s) => s.draft);
+  const [tech, setTech] = useState<ZeriTech>("黄历");
+  const days = useMemo(() => computeZeriDesk(draft, tech), [draft, tech]);
   return (
     <Screen title="择日">
       <Workbench
         canvas={
           <div>
-            <p className="text-sm text-muted">从今日起二十一日，按建除、宜忌打分。本机，不连网。</p>
+            <p className="text-sm text-muted">从今日起二十一日，十技法各算一套。本机，不连网。</p>
+            <div className="-ml-3 mt-3 flex flex-wrap">
+              {ZERI_TECHS.map((t) => (
+                <Chip key={t} active={tech === t} onClick={() => setTech(t)}>
+                  {t}
+                </Chip>
+              ))}
+            </div>
             <ul className="mt-4">
               {days.map((d) => (
                 <li key={d.ymd} className="flex items-start justify-between gap-3 border-b border-line py-3">
@@ -23,9 +31,7 @@ function Page() {
                     <div className="font-display text-lg">
                       {d.ymd.slice(5)} 周{d.week}
                     </div>
-                    <p className="mt-1 text-xs text-muted">
-                      {d.zhixing}日 · 宜 {d.yi || "—"}
-                    </p>
+                    <p className="mt-1 text-xs text-muted">{d.detail}</p>
                   </div>
                   <span className={cn("shrink-0 text-sm", d.score >= 3 ? "text-cinnabar" : "text-muted")}>{d.note}</span>
                 </li>
@@ -35,7 +41,7 @@ function Page() {
         }
         panel={
           <p className="text-sm leading-7 text-muted">
-            宜择：建除为除、开、成、定，且宜中含嫁娶、出行、开市、入宅。黄道日加分。具体用事仍看本命与三式。
+            对照 Windows 择日十技法：黄历、天星、奇门、八字、太乙、紫微、六壬、三式、七政、印占。条件树与方案存档仍以桌面端为准。
           </p>
         }
       />

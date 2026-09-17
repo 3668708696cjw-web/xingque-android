@@ -71,6 +71,26 @@ export function getCity(id: string): City {
   return CITY_BY_ID[id] ?? CITY_BY_ID.taipei;
 }
 
+export function cityOf(b: {
+  cityId: string;
+  lat?: number;
+  lon?: number;
+  tz?: number;
+  place?: string;
+}): City {
+  if (b.lat != null && b.lon != null && Number.isFinite(b.lat) && Number.isFinite(b.lon)) {
+    return {
+      id: b.cityId || "custom",
+      name: b.place || "自定义",
+      region: "",
+      lat: b.lat,
+      lon: b.lon,
+      tz: b.tz ?? Math.round(b.lon / 15),
+    };
+  }
+  return getCity(b.cityId);
+}
+
 export function localToUtc(year: number, month: number, day: number, hour: number, minute: number, tz: number) {
   return new Date(Date.UTC(year, month - 1, day, hour, minute, 0) - tz * 3600000);
 }

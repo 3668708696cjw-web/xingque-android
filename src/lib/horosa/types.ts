@@ -9,6 +9,11 @@ export type BirthInput = {
   hour: number;
   minute: number;
   cityId: string;
+  /** Optional precise coordinates (celebrity database / custom). */
+  lat?: number;
+  lon?: number;
+  tz?: number;
+  place?: string;
 };
 
 export type SavedChart = BirthInput & {

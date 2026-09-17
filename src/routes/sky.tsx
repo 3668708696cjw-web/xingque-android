@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Planetarium } from "@/components/planetarium";
 import { Block, Screen, Workbench } from "@/components/kit";
 import { computeNatal, visiblePlanets } from "@/lib/horosa/natal";
@@ -13,6 +13,24 @@ function Page() {
   const cityId = useChartStore((s) => s.draft.cityId);
   const chart = useMemo(() => computeNatal(nowAsBirth(cityId)), [cityId]);
   const planets = visiblePlanets(chart, false);
+  const [stars, setStars] = useState<{ name: string; mag: string }[]>([]);
+  useEffect(() => {
+    void fetch("/ephe/sefstars.txt")
+      .then((r) => (r.ok ? r.text() : ""))
+      .then((t) => {
+        const rows = t
+          .split("\n")
+          .filter((l) => l && !l.startsWith("#") && !l.startsWith(","))
+          .slice(0, 48)
+          .map((l) => {
+            const parts = l.split(",");
+            return { name: (parts[0] || "").trim(), mag: (parts[13] || "").trim() };
+          })
+          .filter((s) => s.name);
+        setStars(rows);
+      })
+      .catch(() => undefined);
+  }, []);
   return (
     <Screen title="天文馆">
       <Workbench
@@ -46,6 +64,16 @@ function Page() {
                 </p>
               ))}
             </Block>
+            {stars.length ? (
+              <Block title="Swiss 恒星">
+                {stars.map((s) => (
+                  <p key={s.name} className="flex justify-between border-b border-line py-1.5 text-xs">
+                    <span>{s.name}</span>
+                    <span className="text-muted">{s.mag}</span>
+                  </p>
+                ))}
+              </Block>
+            ) : null}
           </div>
         }
       />

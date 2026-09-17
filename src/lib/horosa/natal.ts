@@ -1,5 +1,5 @@
 import * as Astronomy from "astronomy-engine";
-import { getCity, localToUtc } from "./cities";
+import { cityOf, localToUtc } from "./cities";
 import { SIGNS, formatDMS, formatDeg, signOf, type BirthInput } from "./types";
 
 export type PlanetKey =
@@ -16,9 +16,14 @@ export type PlanetKey =
   | "Node"
   | "SNode"
   | "Lilith"
-  | "Chiron";
+  | "Chiron"
+  | "Ceres"
+  | "Pallas"
+  | "Juno"
+  | "Vesta"
+  | "Pholus";
 
-export type HouseSystem = "placidus" | "equal" | "whole";
+export type HouseSystem = "placidus" | "equal" | "whole" | "koch" | "regio" | "campanus" | "alcabitius";
 export type Dignity = "庙" | "旺" | "陷" | "落" | "";
 
 export type PlanetPos = {
@@ -69,6 +74,7 @@ export type NatalChart = {
   sidereal: boolean;
   elements: Record<string, number>;
   modes: Record<string, number>;
+  engine: "swiss" | "astronomy";
 };
 
 const PLANETS: {
@@ -152,7 +158,7 @@ const FALL: Record<string, PlanetKey> = {
   处女: "Venus",
 };
 
-function dignityOf(key: PlanetKey, sign: string): Dignity {
+export function dignityOf(key: PlanetKey, sign: string): Dignity {
   if (RULER[sign]?.includes(key)) return "庙";
   if (EXALT[sign] === key) return "旺";
   if (DETRIMENT[sign]?.includes(key)) return "陷";
@@ -308,7 +314,7 @@ export function computeNatal(
   sidereal = false,
   houseSystem: HouseSystem = "placidus",
 ): NatalChart {
-  const city = getCity(b.cityId);
+  const city = cityOf(b);
   const utc = localToUtc(b.year, b.month, b.day, b.hour, b.minute, city.tz);
   const time = Astronomy.MakeTime(utc);
   const gast = Astronomy.SiderealTime(time);
@@ -427,6 +433,7 @@ export function computeNatal(
     sidereal,
     elements,
     modes,
+    engine: "astronomy",
   };
 }
 
@@ -434,8 +441,10 @@ export function planetByKey(chart: NatalChart, key: PlanetKey) {
   return chart.planets.find((p) => p.key === key);
 }
 
-export function visiblePlanets(chart: NatalChart, modern = true) {
-  return chart.planets.filter((p) => modern || !p.modern);
+const MINOR_KEYS = new Set(["Ceres", "Pallas", "Juno", "Vesta", "Pholus"]);
+
+export function visiblePlanets(chart: NatalChart, modern = true, minors = true) {
+  return chart.planets.filter((p) => (modern || !p.modern) && (minors || !MINOR_KEYS.has(p.key)));
 }
 
 export function aspectGrid(chart: NatalChart, modern = true) {
@@ -449,3 +458,18 @@ export function aspectGrid(chart: NatalChart, modern = true) {
 }
 
 export { SIGNS, formatDeg };
+
+export async function computeNatalAsync(
+  b: BirthInput,
+  sidereal = false,
+  houseSystem: HouseSystem = "placidus",
+): Promise<NatalChart> {
+  try {
+    const { trySwissNatal } = await import("./sweph");
+    const swiss = await trySwissNatal(b, sidereal, houseSystem);
+    if (swiss) return swiss;
+  } catch {
+    /* fall through to astronomy-engine */
+  }
+  return computeNatal(b, sidereal, houseSystem);
+}

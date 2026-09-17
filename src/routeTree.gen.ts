@@ -12,9 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AlmanacRouteImport } from './routes/almanac'
+import { Route as AsteroidsRouteImport } from './routes/asteroids'
 import { Route as BaziRouteImport } from './routes/bazi'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as CelebsRouteImport } from './routes/celebs'
+import { Route as DirectionsRouteImport } from './routes/directions'
 import { Route as FeigongRouteImport } from './routes/feigong'
 import { Route as FengshuiRouteImport } from './routes/fengshui'
 import { Route as GeomancyRouteImport } from './routes/geomancy'
@@ -39,7 +41,9 @@ import { Route as SynastryRouteImport } from './routes/synastry'
 import { Route as TaixuanRouteImport } from './routes/taixuan'
 import { Route as TaiyiRouteImport } from './routes/taiyi'
 import { Route as TarotRouteImport } from './routes/tarot'
+import { Route as TongsheRouteImport } from './routes/tongshe'
 import { Route as TransitsRouteImport } from './routes/transits'
+import { Route as UranianRouteImport } from './routes/uranian'
 import { Route as VedicRouteImport } from './routes/vedic'
 import { Route as WuzhaoRouteImport } from './routes/wuzhao'
 import { Route as XiaochengRouteImport } from './routes/xiaocheng'
@@ -63,6 +67,11 @@ const AlmanacRoute = AlmanacRouteImport.update({
   path: '/almanac',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AsteroidsRoute = AsteroidsRouteImport.update({
+  id: '/asteroids',
+  path: '/asteroids',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BaziRoute = BaziRouteImport.update({
   id: '/bazi',
   path: '/bazi',
@@ -76,6 +85,11 @@ const CatalogRoute = CatalogRouteImport.update({
 const CelebsRoute = CelebsRouteImport.update({
   id: '/celebs',
   path: '/celebs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DirectionsRoute = DirectionsRouteImport.update({
+  id: '/directions',
+  path: '/directions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FeigongRoute = FeigongRouteImport.update({
@@ -198,9 +212,19 @@ const TarotRoute = TarotRouteImport.update({
   path: '/tarot',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TongsheRoute = TongsheRouteImport.update({
+  id: '/tongshe',
+  path: '/tongshe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TransitsRoute = TransitsRouteImport.update({
   id: '/transits',
   path: '/transits',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UranianRoute = UranianRouteImport.update({
+  id: '/uranian',
+  path: '/uranian',
   getParentRoute: () => rootRouteImport,
 } as any)
 const VedicRoute = VedicRouteImport.update({
@@ -243,9 +267,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/almanac': typeof AlmanacRoute
+  '/asteroids': typeof AsteroidsRoute
   '/bazi': typeof BaziRoute
   '/catalog': typeof CatalogRoute
   '/celebs': typeof CelebsRoute
+  '/directions': typeof DirectionsRoute
   '/feigong': typeof FeigongRoute
   '/fengshui': typeof FengshuiRoute
   '/geomancy': typeof GeomancyRoute
@@ -270,7 +296,9 @@ export interface FileRoutesByFullPath {
   '/taixuan': typeof TaixuanRoute
   '/taiyi': typeof TaiyiRoute
   '/tarot': typeof TarotRoute
+  '/tongshe': typeof TongsheRoute
   '/transits': typeof TransitsRoute
+  '/uranian': typeof UranianRoute
   '/vedic': typeof VedicRoute
   '/wuzhao': typeof WuzhaoRoute
   '/xiaocheng': typeof XiaochengRoute
@@ -283,9 +311,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/almanac': typeof AlmanacRoute
+  '/asteroids': typeof AsteroidsRoute
   '/bazi': typeof BaziRoute
   '/catalog': typeof CatalogRoute
   '/celebs': typeof CelebsRoute
+  '/directions': typeof DirectionsRoute
   '/feigong': typeof FeigongRoute
   '/fengshui': typeof FengshuiRoute
   '/geomancy': typeof GeomancyRoute
@@ -310,7 +340,9 @@ export interface FileRoutesByTo {
   '/taixuan': typeof TaixuanRoute
   '/taiyi': typeof TaiyiRoute
   '/tarot': typeof TarotRoute
+  '/tongshe': typeof TongsheRoute
   '/transits': typeof TransitsRoute
+  '/uranian': typeof UranianRoute
   '/vedic': typeof VedicRoute
   '/wuzhao': typeof WuzhaoRoute
   '/xiaocheng': typeof XiaochengRoute
@@ -324,9 +356,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/almanac': typeof AlmanacRoute
+  '/asteroids': typeof AsteroidsRoute
   '/bazi': typeof BaziRoute
   '/catalog': typeof CatalogRoute
   '/celebs': typeof CelebsRoute
+  '/directions': typeof DirectionsRoute
   '/feigong': typeof FeigongRoute
   '/fengshui': typeof FengshuiRoute
   '/geomancy': typeof GeomancyRoute
@@ -351,7 +385,9 @@ export interface FileRoutesById {
   '/taixuan': typeof TaixuanRoute
   '/taiyi': typeof TaiyiRoute
   '/tarot': typeof TarotRoute
+  '/tongshe': typeof TongsheRoute
   '/transits': typeof TransitsRoute
+  '/uranian': typeof UranianRoute
   '/vedic': typeof VedicRoute
   '/wuzhao': typeof WuzhaoRoute
   '/xiaocheng': typeof XiaochengRoute
@@ -366,9 +402,11 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/almanac'
+    | '/asteroids'
     | '/bazi'
     | '/catalog'
     | '/celebs'
+    | '/directions'
     | '/feigong'
     | '/fengshui'
     | '/geomancy'
@@ -393,7 +431,9 @@ export interface FileRouteTypes {
     | '/taixuan'
     | '/taiyi'
     | '/tarot'
+    | '/tongshe'
     | '/transits'
+    | '/uranian'
     | '/vedic'
     | '/wuzhao'
     | '/xiaocheng'
@@ -406,9 +446,11 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/almanac'
+    | '/asteroids'
     | '/bazi'
     | '/catalog'
     | '/celebs'
+    | '/directions'
     | '/feigong'
     | '/fengshui'
     | '/geomancy'
@@ -433,7 +475,9 @@ export interface FileRouteTypes {
     | '/taixuan'
     | '/taiyi'
     | '/tarot'
+    | '/tongshe'
     | '/transits'
+    | '/uranian'
     | '/vedic'
     | '/wuzhao'
     | '/xiaocheng'
@@ -446,9 +490,11 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/almanac'
+    | '/asteroids'
     | '/bazi'
     | '/catalog'
     | '/celebs'
+    | '/directions'
     | '/feigong'
     | '/fengshui'
     | '/geomancy'
@@ -473,7 +519,9 @@ export interface FileRouteTypes {
     | '/taixuan'
     | '/taiyi'
     | '/tarot'
+    | '/tongshe'
     | '/transits'
+    | '/uranian'
     | '/vedic'
     | '/wuzhao'
     | '/xiaocheng'
@@ -487,9 +535,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AlmanacRoute: typeof AlmanacRoute
+  AsteroidsRoute: typeof AsteroidsRoute
   BaziRoute: typeof BaziRoute
   CatalogRoute: typeof CatalogRoute
   CelebsRoute: typeof CelebsRoute
+  DirectionsRoute: typeof DirectionsRoute
   FeigongRoute: typeof FeigongRoute
   FengshuiRoute: typeof FengshuiRoute
   GeomancyRoute: typeof GeomancyRoute
@@ -514,7 +564,9 @@ export interface RootRouteChildren {
   TaixuanRoute: typeof TaixuanRoute
   TaiyiRoute: typeof TaiyiRoute
   TarotRoute: typeof TarotRoute
+  TongsheRoute: typeof TongsheRoute
   TransitsRoute: typeof TransitsRoute
+  UranianRoute: typeof UranianRoute
   VedicRoute: typeof VedicRoute
   WuzhaoRoute: typeof WuzhaoRoute
   XiaochengRoute: typeof XiaochengRoute
@@ -546,6 +598,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AlmanacRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/asteroids': {
+      id: '/asteroids'
+      path: '/asteroids'
+      fullPath: '/asteroids'
+      preLoaderRoute: typeof AsteroidsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/bazi': {
       id: '/bazi'
       path: '/bazi'
@@ -565,6 +624,13 @@ declare module '@tanstack/react-router' {
       path: '/celebs'
       fullPath: '/celebs'
       preLoaderRoute: typeof CelebsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/directions': {
+      id: '/directions'
+      path: '/directions'
+      fullPath: '/directions'
+      preLoaderRoute: typeof DirectionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feigong': {
@@ -735,11 +801,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TarotRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tongshe': {
+      id: '/tongshe'
+      path: '/tongshe'
+      fullPath: '/tongshe'
+      preLoaderRoute: typeof TongsheRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/transits': {
       id: '/transits'
       path: '/transits'
       fullPath: '/transits'
       preLoaderRoute: typeof TransitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/uranian': {
+      id: '/uranian'
+      path: '/uranian'
+      fullPath: '/uranian'
+      preLoaderRoute: typeof UranianRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/vedic': {
@@ -809,9 +889,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AlmanacRoute: AlmanacRoute,
+  AsteroidsRoute: AsteroidsRoute,
   BaziRoute: BaziRoute,
   CatalogRoute: CatalogRoute,
   CelebsRoute: CelebsRoute,
+  DirectionsRoute: DirectionsRoute,
   FeigongRoute: FeigongRoute,
   FengshuiRoute: FengshuiRoute,
   GeomancyRoute: GeomancyRoute,
@@ -836,7 +918,9 @@ const rootRouteChildren: RootRouteChildren = {
   TaixuanRoute: TaixuanRoute,
   TaiyiRoute: TaiyiRoute,
   TarotRoute: TarotRoute,
+  TongsheRoute: TongsheRoute,
   TransitsRoute: TransitsRoute,
+  UranianRoute: UranianRoute,
   VedicRoute: VedicRoute,
   WuzhaoRoute: WuzhaoRoute,
   XiaochengRoute: XiaochengRoute,

@@ -5,8 +5,7 @@ import { NatalWheel } from "@/components/natal-wheel";
 import { Block, Chip, Ghost, Meta, Screen, Workbench } from "@/components/kit";
 import { computeParts } from "@/lib/horosa/parts";
 import { computeAcg, computeDraconic, computeHarmonic, throwDice, type DiceResult } from "@/lib/horosa/modules";
-import { computeNatal } from "@/lib/horosa/natal";
-import { nowAsBirth } from "@/lib/horosa/cities";
+import { computeHorary } from "@/lib/horosa/horary";
 import { useChartStore } from "@/lib/horosa/store";
 
 export const Route = createFileRoute("/parts")({ component: Page });
@@ -21,7 +20,7 @@ function Page() {
   const parts = useMemo(() => computeParts(draft), [draft]);
   const harmonic = useMemo(() => computeHarmonic(draft, harm), [draft, harm]);
   const draconic = useMemo(() => computeDraconic(draft), [draft]);
-  const horary = useMemo(() => computeNatal(nowAsBirth(draft.cityId)), [draft.cityId]);
+  const horary = useMemo(() => computeHorary(draft.cityId, 7), [draft.cityId]);
   const acg = useMemo(() => computeAcg(draft), [draft]);
 
   const canvas =
@@ -47,20 +46,47 @@ function Page() {
       </div>
     ) : tab === "卜卦" ? (
       <div>
-        <Meta>此刻为问事时刻</Meta>
+        <Meta>
+          {horary.radical ? "可看" : "慎看"} · 问家 {horary.querent} · 时主 {horary.hourLord}
+        </Meta>
         <div className="mt-3">
-          <NatalWheel chart={horary} modern={false} />
+          <NatalWheel chart={horary.natal} modern={false} />
         </div>
       </div>
     ) : tab === "ACG" ? (
-      <ul className="text-sm">
-        {acg.map((l) => (
-          <li key={l.planet} className="flex justify-between border-b border-line py-2">
-            <span>{l.planet}</span>
-            <span className="tabular-nums text-muted">{l.lon}°</span>
-          </li>
-        ))}
-      </ul>
+      <div>
+        <Meta>行星 MC 线地理经度（赤经近似）</Meta>
+        <svg viewBox="0 0 360 80" className="mt-4 w-full text-ink" aria-label="ACG 经线">
+          <rect x="0" y="20" width="360" height="40" fill="currentColor" opacity="0.06" />
+          {[-180, -90, 0, 90, 180].map((x) => (
+            <g key={x}>
+              <line x1={x + 180} y1="20" x2={x + 180} y2="60" stroke="currentColor" strokeWidth="0.6" opacity="0.35" />
+              <text x={x + 180} y="74" textAnchor="middle" fill="currentColor" fontSize="7" opacity="0.6">
+                {x}°
+              </text>
+            </g>
+          ))}
+          {acg.map((l, i) => {
+            const x = ((l.lon + 180) % 360 + 360) % 360;
+            return (
+              <g key={l.planet}>
+                <line x1={x} y1="18" x2={x} y2="62" stroke="currentColor" strokeWidth="1.2" className="text-cinnabar" />
+                <text x={x} y={12 + (i % 2) * 6} textAnchor="middle" fill="currentColor" fontSize="7">
+                  {l.planet}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+        <ul className="mt-4 text-sm">
+          {acg.map((l) => (
+            <li key={l.planet} className="flex justify-between border-b border-line py-2">
+              <span>{l.planet}</span>
+              <span className="tabular-nums text-muted">{l.lon}°</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     ) : (
       <div>
         <Ghost type="button" onClick={() => setDice(throwDice())}>
@@ -111,9 +137,25 @@ function Page() {
                 ))}
               </Block>
             </div>
+          ) : tab === "卜卦" ? (
+            <div>
+              <Block title="慎重条件">
+                <p className="text-sm leading-7">{horary.radicalNote}</p>
+                <p className="mt-2 text-sm text-muted">
+                  月 {horary.vocNote} · 下一相 {horary.moonNext}
+                </p>
+              </Block>
+              <Block title="论断">
+                {horary.considerations.map((c) => (
+                  <p key={c} className="border-b border-line py-2 text-sm leading-6">
+                    {c}
+                  </p>
+                ))}
+              </Block>
+            </div>
           ) : (
             <p className="text-sm leading-7 text-muted">
-              辅盘对应 Windows「卜卦、谐波、龙盘、中点、ACG、骰子」。三维地图与汉堡 90° 盘仍需桌面端。
+              辅盘对应 Windows「卜卦、谐波、龙盘、中点、ACG」。汉堡九十度盘见「汉堡」。
             </p>
           )
         }

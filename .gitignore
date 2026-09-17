@@ -1,9 +1,16 @@
 node_modules
 .output
 dist
+dist-apk
 android/app/build
 android/.gradle
 android/build
+android/app/src/main/assets
 android/capacitor-cordova-android-plugins/build
+data/ephe
+data/PersonList-15k.csv
+*.apk
 *.log
 .DS_Store
+screenshots
+artifacts

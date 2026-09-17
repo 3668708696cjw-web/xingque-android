@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { useChartStore } from "@/lib/horosa/store";
 import { birthLabel, type SavedChart } from "@/lib/horosa/types";
-import { getCity } from "@/lib/horosa/cities";
+import { cityOf } from "@/lib/horosa/cities";
 
 export const Route = createFileRoute("/me")({ component: Me });
 
@@ -79,7 +79,7 @@ export function Me() {
               >
                 <div className="font-display text-[17px]">{c.name || "未名"}</div>
                 <div className="text-[12px] text-muted">
-                  {birthLabel(c)} · {getCity(c.cityId).name}
+                  {birthLabel(c)} · {cityOf(c).name}
                 </div>
               </button>
               <button type="button" className="text-[12px] text-faint" onClick={() => removeChart(c.id)}>

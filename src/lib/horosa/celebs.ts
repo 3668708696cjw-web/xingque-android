@@ -86,3 +86,42 @@ export const CELEBS: Celeb[] = [
   { name: "马云", who: "企业家", note: "杭州", gender: "male", year: 1964, month: 9, day: 10, hour: 12, minute: 0, cityId: "hangzhou" },
   { name: "马化腾", who: "企业家", note: "汕头", gender: "male", year: 1971, month: 10, day: 29, hour: 12, minute: 0, cityId: "shenzhen" },
 ];
+
+export type PackedCeleb = {
+  name: string;
+  gender: "male" | "female";
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  lat: number;
+  lon: number;
+  tz: number;
+  place: string;
+  rodden: string;
+};
+
+let packedCache: PackedCeleb[] | null = null;
+
+export async function loadPackedCelebs(): Promise<PackedCeleb[]> {
+  if (packedCache) return packedCache;
+  try {
+    const r = await fetch("/celebs.json");
+    if (!r.ok) return [];
+    const data = (await r.json()) as { rows?: unknown[] };
+    packedCache = (data.rows ?? []).map((row) => {
+      const [name, g, year, month, day, hour, minute, lat, lon, tz, place, rodden] = row as [
+        string, string, number, number, number, number, number, number, number, number, string, string,
+      ];
+      return {
+        name,
+        gender: g === "f" ? "female" : "male",
+        year, month, day, hour, minute, lat, lon, tz, place, rodden,
+      };
+    });
+    return packedCache;
+  } catch {
+    return [];
+  }
+}

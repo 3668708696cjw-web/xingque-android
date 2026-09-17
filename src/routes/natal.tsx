@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
 import { AspectGrid, NatalWheel, type WheelStyle } from "@/components/natal-wheel";
 import { Bar, Block, Chip, Fold, Interpret, Meta, PanelSections, Screen, Workbench, useHydrated } from "@/components/kit";
-import { computeNatal, visiblePlanets, type HouseSystem } from "@/lib/horosa/natal";
+import { computeNatal, computeNatalAsync, visiblePlanets, type HouseSystem, type NatalChart } from "@/lib/horosa/natal";
 import { useChartStore } from "@/lib/horosa/store";
 import { formatDMS } from "@/lib/horosa/types";
 
@@ -16,13 +16,30 @@ function Page() {
   const [houses, setHouses] = useState<HouseSystem>("placidus");
   const [modern, setModern] = useState(true);
   const [style, setStyle] = useState<WheelStyle>("wheel");
-  const chart = useMemo(
+  const [minors, setMinors] = useState(false);
+  const fallback = useMemo(
     () => (ready ? computeNatal(draft, sidereal, houses) : null),
     [draft, sidereal, houses, ready],
   );
-  const planets = chart ? visiblePlanets(chart, modern) : [];
-  const aspects = chart
-    ? chart.aspects.filter((a) => planets.some((p) => p.key === a.a) && planets.some((p) => p.key === a.b))
+  const [swiss, setSwiss] = useState<NatalChart | null>(null);
+  useEffect(() => {
+    if (!ready) return;
+    let live = true;
+    setSwiss(null);
+    void computeNatalAsync(draft, sidereal, houses).then((c) => {
+      if (live && c.engine === "swiss") setSwiss(c);
+    });
+    return () => {
+      live = false;
+    };
+  }, [draft, sidereal, houses, ready]);
+  const chart = swiss ?? fallback;
+  const planets = chart
+    ? visiblePlanets(chart, modern).filter((p) => minors || !["Ceres", "Pallas", "Juno", "Vesta", "Pholus"].includes(p.key))
+    : [];
+  const view = chart ? { ...chart, planets } : null;
+  const aspects = view
+    ? view.aspects.filter((a) => planets.some((p) => p.key === a.a) && planets.some((p) => p.key === a.b))
     : [];
 
   return (
@@ -37,10 +54,15 @@ function Page() {
                   <Chip active={!sidereal} onClick={() => setSidereal(false)}>热带</Chip>
                   <Chip active={sidereal} onClick={() => setSidereal(true)}>恒星</Chip>
                   <Chip active={houses === "placidus"} onClick={() => setHouses("placidus")}>Placidus</Chip>
+                  <Chip active={houses === "koch"} onClick={() => setHouses("koch")}>Koch</Chip>
+                  <Chip active={houses === "regio"} onClick={() => setHouses("regio")}>Regio</Chip>
+                  <Chip active={houses === "campanus"} onClick={() => setHouses("campanus")}>Campanus</Chip>
                   <Chip active={houses === "equal"} onClick={() => setHouses("equal")}>等宫</Chip>
                   <Chip active={houses === "whole"} onClick={() => setHouses("whole")}>整宫</Chip>
+                  <Chip active={houses === "alcabitius"} onClick={() => setHouses("alcabitius")}>Alcabitius</Chip>
                   <Chip active={!modern} onClick={() => setModern(false)}>古典</Chip>
                   <Chip active={modern} onClick={() => setModern(true)}>现代</Chip>
+                  <Chip active={minors} onClick={() => setMinors((v) => !v)}>小行星</Chip>
                   <Chip active={style === "wheel"} onClick={() => setStyle("wheel")}>圆盘</Chip>
                   <Chip active={style === "square"} onClick={() => setStyle("square")}>中世纪</Chip>
                   <Chip active={style === "north"} onClick={() => setStyle("north")}>北印</Chip>
@@ -52,6 +74,7 @@ function Page() {
               <Meta>
                 ASC {formatDMS(chart.asc)} · MC {formatDMS(chart.mc)} · {chart.city} · {chart.houseSystem}
                 {chart.sidereal ? ` · 岁差 ${chart.ayanamsa.toFixed(2)}°` : ""}
+                {` · ${chart.engine === "swiss" ? "Swiss" : "AE"}`}
               </Meta>
             </div>
           ) : (
@@ -122,6 +145,7 @@ function Page() {
                         <Meta>
                           黄赤交角 {chart.obliquity.toFixed(4)}°
                           {chart.sidereal ? ` · 岁差 ${chart.ayanamsa.toFixed(4)}°` : ""}
+                          {` · ${chart.engine === "swiss" ? "Swiss Ephemeris" : "astronomy-engine"}`}
                         </Meta>
                       </div>
                     ),

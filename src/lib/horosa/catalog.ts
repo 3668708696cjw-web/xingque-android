@@ -8,19 +8,23 @@ export type Technique = {
 /** 对照 Windows navigationPages：命 / 卜 / 工具。不含 AI、3D、直播、管理。 */
 export const MING: Technique[] = [
   { path: "/natal", name: "占星", blurb: "本命、宫制、相位、希腊点", mark: "星" },
-  { path: "/transits", name: "星运", blurb: "过运、返照、法达、太阳弧、小限", mark: "运" },
+  { path: "/transits", name: "星运", blurb: "过运、返照、法达、黄道星释、十年", mark: "运" },
   { path: "/bazi", name: "八字", blurb: "四柱、大运流年、神煞", mark: "八" },
   { path: "/ziwei", name: "紫微", blurb: "十二宫、四化、大限", mark: "紫" },
   { path: "/qizheng", name: "七政", blurb: "七政四余、果老星宗", mark: "政" },
   { path: "/vedic", name: "印占", blurb: "北印盘、月宿、达沙", mark: "印" },
   { path: "/parts", name: "辅盘", blurb: "阿拉伯点、谐波、龙盘、卜卦、ACG", mark: "辅" },
-  { path: "/synastry", name: "合盘", blurb: "比较盘、双轮", mark: "合" },
-  { path: "/shushu", name: "数算", blurb: "皇极、铁板、河洛、梅花", mark: "数" },
+  { path: "/synastry", name: "合盘", blurb: "比较、组合、时空中点、马克斯", mark: "合" },
+  { path: "/asteroids", name: "小行星", blurb: "谷神智神婚神灶神、编号星历", mark: "小" },
+  { path: "/uranian", name: "汉堡", blurb: "中点、九十度盘、八颗天王星", mark: "汉" },
+  { path: "/directions", name: "主限", blurb: "托勒密、奈博、主限弧", mark: "限" },
+  { path: "/shushu", name: "数算", blurb: "皇极、铁板、河洛、神易、梅花", mark: "数" },
   { path: "/mingother", name: "演禽", blurb: "演禽、一掌经、策天", mark: "禽" },
 ];
 
 export const BU: Technique[] = [
   { path: "/sanshi", name: "三式", blurb: "太乙、六壬、奇门同参", mark: "三" },
+  { path: "/tongshe", name: "统摄", blurb: "三式合一断、值使三传文昌", mark: "统" },
   { path: "/liuren", name: "六壬", blurb: "天地盘、四课三传、涉害", mark: "壬" },
   { path: "/qimen", name: "遁甲", blurb: "时家转盘飞盘、拆补置闰", mark: "奇" },
   { path: "/liuyao", name: "六爻", blurb: "纳甲、世应、伏神", mark: "爻" },
@@ -42,10 +46,10 @@ export const BU: Technique[] = [
 export const TOOLS: Technique[] = [
   { path: "/history", name: "玄学史", blurb: "人物、编年、天象、词条、地图", mark: "史" },
   { path: "/almanac", name: "黄历", blurb: "宜忌、建除、时辰", mark: "历" },
-  { path: "/zeri", name: "择日", blurb: "二十一日窗、吉门吉神", mark: "择" },
-  { path: "/sky", name: "天文馆", blurb: "此刻星空、二十八宿", mark: "天" },
+  { path: "/zeri", name: "择日", blurb: "十技法：黄历天星奇门八字太乙紫微", mark: "择" },
+  { path: "/sky", name: "天文馆", blurb: "此刻星空、二十八宿、恒星表", mark: "天" },
   { path: "/reference", name: "辅助", blurb: "卦象、宫位、十神、规则", mark: "辅" },
-  { path: "/celebs", name: "数据库", blurb: "公开出生数据", mark: "库" },
+  { path: "/celebs", name: "数据库", blurb: "一万五千条 Rodden AA 生时", mark: "库" },
 ];
 
 export const ALL_TECHNIQUES = [...MING, ...BU, ...TOOLS];

@@ -37,12 +37,20 @@ function Page() {
                 先天 {data.heluo.xiantian}
               </p>
               <p className="mt-1 font-display text-xl">后天 {data.heluo.houtian}</p>
-              <p className="mt-2 text-sm text-muted">{data.heluo.note}</p>
+              <p className="mt-2 text-sm text-muted">{data.heluo.he}</p>
+              <p className="mt-1 text-sm text-muted">{data.heluo.note}</p>
             </div>
             <div className="border-b border-line pb-6">
               <p className="text-[11px] tracking-wide text-muted">铁板</p>
               <p className="mt-3 font-display text-3xl">第 {data.tieban.no} 数</p>
-              <p className="mt-2 text-sm text-muted">{data.tieban.note}</p>
+              <p className="mt-2 text-sm text-muted">{data.tieban.ci}</p>
+            </div>
+            <div className="border-b border-line pb-6">
+              <p className="text-[11px] tracking-wide text-muted">神易数</p>
+              <p className="mt-3 font-display text-2xl">{data.shenyi.gua}</p>
+              <p className="mt-2 text-sm text-muted">
+                第 {data.shenyi.number} 卦 · {data.shenyi.note}
+              </p>
             </div>
           </div>
         }

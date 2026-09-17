@@ -46,6 +46,20 @@ function Page() {
                 ))}
               </div>
             </Fold>
+            <Fold title="三合">
+              <p className="text-sm leading-7 text-muted">{data.sanhe.note}</p>
+            </Fold>
+            <Fold title="门派">
+              {data.schools.map((s) => (
+                <div key={s.name} className="border-b border-line py-2">
+                  <div className="flex justify-between text-sm">
+                    <span>{s.name}</span>
+                    <span className="text-muted">{s.kind}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted">{s.note}</p>
+                </div>
+              ))}
+            </Fold>
           </div>
         }
       />

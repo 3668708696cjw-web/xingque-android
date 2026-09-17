@@ -1,5 +1,5 @@
-import { readdirSync } from "node:fs";
-import { join } from "node:path";
+import { createReadStream, existsSync, readdirSync, statSync } from "node:fs";
+import { extname, join, normalize } from "node:path";
 import type { Plugin } from "vite";
 import { defineConfig } from "vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
@@ -11,6 +11,47 @@ import { grokPwaPlugin } from "./scripts/grok-pwa-plugin.mjs";
 // @ts-expect-error JS plugin alongside the TS vite config
 import { appEnvPlugin } from "./scripts/app-env-plugin.mjs";
 import { isMigrationFile } from "./scripts/migration-plan.mjs";
+
+function epheDevPlugin(): Plugin {
+  const root = "/workspace/data/ephe";
+  const mime: Record<string, string> = {
+    ".se1": "application/octet-stream",
+    ".eph": "application/octet-stream",
+    ".txt": "text/plain; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+  };
+  const handle = (req: { url?: string }, res: { statusCode: number; setHeader: (k: string, v: string) => void; end: (s?: string) => void }, next: () => void) => {
+    const u = (req.url ?? "").split("?")[0] ?? "";
+    if (!u.startsWith("/ephe/")) {
+      next();
+      return;
+    }
+    const rel = decodeURIComponent(u.slice("/ephe/".length));
+    if (!rel || rel.includes("..") || rel.startsWith("/")) {
+      res.statusCode = 400;
+      res.end("bad path");
+      return;
+    }
+    const file = normalize(join(root, rel));
+    if (!file.startsWith(root) || !existsSync(file) || !statSync(file).isFile()) {
+      res.statusCode = 404;
+      res.end("not found");
+      return;
+    }
+    res.setHeader("Content-Type", mime[extname(file)] ?? "application/octet-stream");
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    createReadStream(file).pipe(res as never);
+  };
+  return {
+    name: "xingque-ephe-static",
+    configureServer(server) {
+      server.middlewares.use(handle);
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(handle);
+    },
+  };
+}
 
 /** The files `src/lib/db.ts` globs — same directory, same non-recursive scope. */
 function hasGlobbedMigrations(root: string): boolean {
@@ -150,6 +191,9 @@ export default defineConfig(({ command, isPreview }) => ({
     host: "0.0.0.0",
     port: 8080,
     strictPort: true,
+    watch: {
+      ignored: ["**/android/**", "**/data/ephe/**", "**/dist-apk/**", "**/artifacts/**"],
+    },
   },
   preview: {
     host: "127.0.0.1",
@@ -157,8 +201,12 @@ export default defineConfig(({ command, isPreview }) => ({
     strictPort: true,
   },
   resolve: { tsconfigPaths: true },
+  optimizeDeps: {
+    include: ["@swisseph/browser"],
+  },
   plugins: [
     pgliteBootstrapPlugin(),
+    epheDevPlugin(),
     // Before tanstackStart so /auth/popup never falls through to the SPA.
     authPopupPlugin(),
     // Dev-only /__app-env, read by scripts/check-auth-invariant.mjs.
