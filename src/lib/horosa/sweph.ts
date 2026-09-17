@@ -163,9 +163,21 @@ export async function loadAsteroidFile(n: number) {
   const key = `${folder}/${name}`;
   if (loaded.has(key) || loaded.has(name)) return true;
   try {
-    await swe.loadEphemerisFiles([
-      { name, url: `/ephe/${folder}/${name}` },
-    ]);
+    const { readPackedSe1, packedSe1Url } = await import("./zip-store");
+    const packed = await readPackedSe1(name);
+    if (packed) {
+      const url = packedSe1Url(packed);
+      await swe.loadEphemerisFiles([{ name, url }]);
+      URL.revokeObjectURL(url);
+      loaded.add(name);
+      loaded.add(key);
+      return true;
+    }
+  } catch {
+    /* fall through to /ephe */
+  }
+  try {
+    await swe.loadEphemerisFiles([{ name, url: `/ephe/${folder}/${name}` }]);
     loaded.add(name);
     loaded.add(key);
     return true;

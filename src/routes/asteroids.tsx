@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BirthPanel } from "@/components/birth-form";
-import { Block, Chip, Field, FieldInput, Meta, Screen, Workbench } from "@/components/kit";
+import { Block, Chip, Field, FieldInput, Meta, Primary, Screen, Workbench } from "@/components/kit";
 import {
   computeFamousAsteroids,
   computeOneAsteroid,
@@ -10,6 +10,7 @@ import {
   type AsteroidCatalog,
   type AsteroidRow,
 } from "@/lib/horosa/asteroids";
+import { importAsteroidZip, listPacks } from "@/lib/horosa/zip-store";
 import { useChartStore } from "@/lib/horosa/store";
 
 export const Route = createFileRoute("/asteroids")({ component: Page });
@@ -21,9 +22,13 @@ function Page() {
   const [q, setQ] = useState("");
   const [extra, setExtra] = useState<AsteroidRow | null>(null);
   const [busy, setBusy] = useState(false);
+  const [packs, setPacks] = useState<{ name: string; size: number; count: number }[]>([]);
+  const [msg, setMsg] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     void loadAsteroidCatalog().then(setCat);
+    void listPacks().then(setPacks);
   }, []);
 
   useEffect(() => {
@@ -55,6 +60,21 @@ function Page() {
     const hit = await computeOneAsteroid(draft, n);
     setExtra(hit);
     setBusy(false);
+    if (!hit) setMsg("这颗星的星历还不在本机。请导入对应星历包。");
+  }
+
+  async function onPack(file: File) {
+    setBusy(true);
+    setMsg("正在装入…");
+    try {
+      const meta = await importAsteroidZip(file);
+      const list = await listPacks();
+      setPacks(list);
+      setMsg(`已装入 ${meta.name}，${meta.count} 颗。`);
+    } catch {
+      setMsg("不是星阙星历包，或压缩方式不对。请用发行页上的 Xingque-ephe-ast0/1/2.zip。");
+    }
+    setBusy(false);
   }
 
   return (
@@ -64,9 +84,7 @@ function Page() {
         canvas={
           <div>
             <Meta>
-              {cat
-                ? `本机星历 ${(cat.bytes / 1_000_000_000).toFixed(2)} GB · 编号文件 ${cat.count} 颗`
-                : "载入星历目录…"}
+              谷神族随包可用。编号星需导入星历包，装入后断网也能算。
               {busy ? " · 计算中" : ""}
             </Meta>
             <ul className="mt-6">
@@ -92,6 +110,40 @@ function Page() {
         }
         panel={
           <div>
+            <Block title="星历包">
+              <p className="text-sm leading-6 text-muted">
+                安装包只带世纪主星历。编号小行星分成三个 zip（ast0 / ast1 / ast2），在发行页下载后点下面装入。装进本机后一直可用。
+              </p>
+              <div className="mt-3">
+                <Primary type="button" onClick={() => fileRef.current?.click()} disabled={busy}>
+                  从文件装入星历包
+                </Primary>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept=".zip,application/zip"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = "";
+                    if (f) void onPack(f);
+                  }}
+                />
+              </div>
+              {packs.length ? (
+                <ul className="mt-3">
+                  {packs.map((p) => (
+                    <li key={p.name} className="flex justify-between py-2 text-sm">
+                      <span>{p.name}</span>
+                      <span className="tabular-nums text-muted">{p.count} 颗</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-xs text-faint">还没有装入编号星历包。</p>
+              )}
+              {msg ? <p className="mt-2 text-xs text-cinnabar">{msg}</p> : null}
+            </Block>
             <Block title="编号检索">
               <Field label="名称或编号">
                 <FieldInput value={q} onChange={(e) => setQ(e.target.value)} placeholder="Psyche / 16" />
@@ -103,12 +155,6 @@ function Page() {
                   </Chip>
                 ))}
               </div>
-            </Block>
-            <Block title="说明">
-              <p className="text-sm leading-6 text-muted">
-                谷神、智神、婚神、灶神走主星历 seas；其余编号按需载入 ast0/ast1 的 seNNNNN.se1。JPL
-                de200/de406e 随包装入，WebView 不整包灌进内存。
-              </p>
             </Block>
           </div>
         }

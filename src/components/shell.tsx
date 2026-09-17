@@ -9,11 +9,11 @@ import { useChartStore } from "@/lib/horosa/store";
 const TABS = [
   { to: "/", label: "今日", icon: Circle },
   { to: "/catalog", label: "排盘", icon: Layers },
+  { to: "/me", label: "命例", icon: User },
   { to: "/history", label: "史", icon: BookOpen },
-  { to: "/me", label: "我", icon: User },
 ] as const;
 
-const TAB_PATHS = new Set(["/", "/catalog", "/history", "/me"]);
+const TAB_PATHS = new Set(["/", "/catalog", "/history", "/me", "/about"]);
 
 const GROUPS = [
   { key: "ming", title: "命", items: MING },
@@ -96,7 +96,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 ["bu", "卜"],
                 ["tools", "工具"],
                 ["history", "史"],
-                ["me", "我"],
+                ["me", "命例"],
               ] as const
             ).map(([k, lab]) =>
               k === "history" ? (
@@ -154,10 +154,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             {TABS.map((t) => {
               const on =
                 t.to === "/catalog"
-                  ? pathname === "/catalog" || (!TAB_PATHS.has(pathname) && pathname !== "/about")
+                  ? pathname === "/catalog" || (!TAB_PATHS.has(pathname) && !pathname.startsWith("/history"))
                   : t.to === "/history"
                     ? pathname.startsWith("/history")
-                    : pathname === t.to;
+                    : t.to === "/me"
+                      ? pathname === "/me" || pathname === "/about"
+                      : pathname === t.to;
               const Icon = t.icon;
               return (
                 <Link key={t.to} to={t.to} className="flex h-14 flex-col items-center justify-center gap-0.5">

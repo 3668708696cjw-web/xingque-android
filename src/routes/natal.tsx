@@ -50,9 +50,13 @@ function Page() {
           chart ? (
             <div>
               <Fold title="盘式" defaultOpen={false} badge={`${sidereal ? "恒星" : "热带"} · ${style === "wheel" ? "圆" : style === "square" ? "方" : "印"}`}>
-                <div className="-ml-3 flex flex-wrap">
+                <p className="mb-1 text-xs text-faint">黄道</p>
+                <div className="-ml-3 mb-2 flex flex-wrap">
                   <Chip active={!sidereal} onClick={() => setSidereal(false)}>热带</Chip>
                   <Chip active={sidereal} onClick={() => setSidereal(true)}>恒星</Chip>
+                </div>
+                <p className="mb-1 text-xs text-faint">宫制</p>
+                <div className="-ml-3 mb-2 flex flex-wrap">
                   <Chip active={houses === "placidus"} onClick={() => setHouses("placidus")}>Placidus</Chip>
                   <Chip active={houses === "koch"} onClick={() => setHouses("koch")}>Koch</Chip>
                   <Chip active={houses === "regio"} onClick={() => setHouses("regio")}>Regio</Chip>
@@ -60,16 +64,22 @@ function Page() {
                   <Chip active={houses === "equal"} onClick={() => setHouses("equal")}>等宫</Chip>
                   <Chip active={houses === "whole"} onClick={() => setHouses("whole")}>整宫</Chip>
                   <Chip active={houses === "alcabitius"} onClick={() => setHouses("alcabitius")}>Alcabitius</Chip>
+                </div>
+                <p className="mb-1 text-xs text-faint">行星</p>
+                <div className="-ml-3 mb-2 flex flex-wrap">
                   <Chip active={!modern} onClick={() => setModern(false)}>古典</Chip>
                   <Chip active={modern} onClick={() => setModern(true)}>现代</Chip>
                   <Chip active={minors} onClick={() => setMinors((v) => !v)}>小行星</Chip>
+                </div>
+                <p className="mb-1 text-xs text-faint">盘貌</p>
+                <div className="-ml-3 flex flex-wrap">
                   <Chip active={style === "wheel"} onClick={() => setStyle("wheel")}>圆盘</Chip>
                   <Chip active={style === "square"} onClick={() => setStyle("square")}>中世纪</Chip>
                   <Chip active={style === "north"} onClick={() => setStyle("north")}>北印</Chip>
                 </div>
               </Fold>
-              <div className="chart-stage mt-1">
-                <NatalWheel chart={chart} modern={modern} style={style} />
+              <div className="chart-stage mt-3">
+                <NatalWheel chart={chart} modern={modern} style={style} minors={minors} />
               </div>
               <Meta>
                 ASC {formatDMS(chart.asc)} · MC {formatDMS(chart.mc)} · {chart.city} · {chart.houseSystem}
@@ -151,8 +161,23 @@ function Page() {
                     ),
                   },
                   {
+                    id: "宫位",
+                    content: (
+                      <ul>
+                        {["命", "财", "兄", "家", "子", "病", "偶", "危", "迁", "业", "福", "隐"].map((name, i) => (
+                          <li key={name} className="flex justify-between border-b border-line py-2 text-sm">
+                            <span>
+                              {i + 1} {name}
+                            </span>
+                            <span className="tabular-nums text-muted">{formatDMS(chart.houses[i] ?? 0)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ),
+                  },
+                  {
                     id: "网格",
-                    content: <AspectGrid chart={chart} modern={modern} />,
+                    content: <AspectGrid chart={chart} modern={modern} minors={minors} />,
                   },
                 ]}
               />

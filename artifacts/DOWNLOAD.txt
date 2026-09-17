@@ -1,0 +1,12 @@
+星阙 本地离线 v5.0.0
+
+请从 GitHub 发行页下载，不要用 v4.0.0（1.8GB，会卡在最后一秒）。
+
+https://github.com/3668708696cjw-web/xingque-android/releases/tag/v5.0.0
+
+Xingque-offline-5.0.0.apk  —— 应用本体（世纪星历已打进包）
+Xingque-ephe-ast0.zip      —— 编号小行星 0–999（可选）
+Xingque-ephe-ast1.zip      —— 1000–1999（可选）
+Xingque-ephe-ast2.zip      —— 2000+（可选）
+
+装星历包：打开 App → 排盘 → 小行星 → 从文件装入星历包。

@@ -1,9 +1,12 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { interpretLocal } from "@/lib/horosa/interpret";
-import { ALL_TECHNIQUES } from "@/lib/horosa/catalog";
+import { useChartStore } from "@/lib/horosa/store";
+import { SECTIONS } from "@/lib/horosa/catalog";
+import { cityOf } from "@/lib/horosa/cities";
+import { birthLabel } from "@/lib/horosa/types";
 
 export function Screen({
   title,
@@ -14,36 +17,133 @@ export function Screen({
   children: React.ReactNode;
   action?: React.ReactNode;
 }) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const nearby = ALL_TECHNIQUES.filter((t) => t.path !== "/history");
+  const [jump, setJump] = useState(false);
   return (
-    <div className="mx-auto w-full px-4 pb-8 pt-2 md:px-5 md:pb-8 md:pt-3 lg:px-6">
-      <header className="mb-3 flex items-center gap-1 lg:mb-6">
-        <Link
-          to="/catalog"
-          className="flex size-11 items-center justify-center text-ink transition-transform duration-150 ease-out active:scale-[0.96] md:hidden"
-          aria-label="排盘"
+    <div className="mx-auto w-full px-4 pb-10 pt-2 md:px-6 md:pt-4">
+      <header className="mb-2 flex items-center gap-1">
+        <button
+          type="button"
+          className="flex size-11 shrink-0 items-center justify-center text-ink transition-transform duration-150 ease-out active:scale-[0.96] md:hidden"
+          aria-label="返回"
+          onClick={() => {
+            if (window.history.length > 1) window.history.back();
+            else window.location.hash = "#/catalog";
+          }}
         >
           <ChevronLeft className="size-6" strokeWidth={1.5} />
-        </Link>
-        <h1 className="font-display text-xl font-medium leading-tight tracking-tight md:text-2xl">{title}</h1>
-        <div className="ml-auto">{action}</div>
-      </header>
-      <div className="-mx-4 mb-4 flex overflow-x-auto border-b border-line px-2 [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden">
-        {nearby.map((t) => (
-          <Link
-            key={t.path}
-            to={t.path as never}
-            className={cn(
-              "h-10 shrink-0 px-3 text-sm",
-              pathname === t.path ? "border-b border-ink text-ink" : "text-muted",
-            )}
+        </button>
+        <h1 className="font-display text-[1.375rem] font-medium leading-tight tracking-tight md:text-2xl">{title}</h1>
+        <div className="ml-auto flex shrink-0 items-center">
+          <button
+            type="button"
+            className="h-11 px-2 text-sm text-muted lg:hidden"
+            onClick={() => setJump(true)}
           >
-            {t.name}
-          </Link>
+            技法
+          </button>
+          {action ?? <SaveChartButton />}
+        </div>
+      </header>
+      <DraftStrip />
+      {children}
+      {jump ? <TechniqueSheet onClose={() => setJump(false)} /> : null}
+    </div>
+  );
+}
+
+function DraftStrip() {
+  const draft = useChartStore((s) => s.draft);
+  const setNow = useChartStore((s) => s.setNow);
+  return (
+    <div className="mb-4 flex min-h-11 items-baseline justify-between gap-3 border-b border-line pb-3">
+      <p className="min-w-0 truncate text-sm">
+        <span className="font-display">{draft.name || cityOf(draft).name}</span>
+        <span className="ml-2 tabular-nums text-muted">{birthLabel(draft)}</span>
+        <span className="ml-2 text-faint">{cityOf(draft).name}</span>
+      </p>
+      <button type="button" className="h-11 shrink-0 px-2 text-sm text-cinnabar" onClick={setNow}>
+        此刻
+      </button>
+    </div>
+  );
+}
+
+function TechniqueSheet({ onClose }: { onClose: () => void }) {
+  const [q, setQ] = useState("");
+  const sections = useMemo(() => {
+    const s = q.trim();
+    if (!s) return SECTIONS;
+    return SECTIONS.map((sec) => ({
+      ...sec,
+      items: sec.items.filter((i) => i.name.includes(s) || i.blurb.includes(s)),
+    })).filter((sec) => sec.items.length);
+  }, [q]);
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-bg/80" role="dialog" aria-label="换技法">
+      <button type="button" className="h-16 shrink-0" onClick={onClose} aria-label="关闭" />
+      <div className="mt-auto max-h-[82dvh] overflow-y-auto rounded-t-xl bg-surface px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-4 shadow-card">
+        <div className="mb-3 flex items-center">
+          <p className="font-display text-lg">换技法</p>
+          <button type="button" className="ml-auto h-11 px-2 text-sm text-muted" onClick={onClose}>
+            关闭
+          </button>
+        </div>
+        <p className="mb-3 text-xs text-muted">出生时间跟着走，只换盘式。</p>
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="搜索技法"
+          className="mb-4 h-12 w-full border-0 border-b border-line bg-transparent text-base outline-none placeholder:text-faint focus:border-ink"
+        />
+        {sections.map((sec) => (
+          <section key={sec.key} className="mb-5">
+            <h3 className="mb-1 text-[11px] tracking-[0.2em] text-faint">{sec.title}</h3>
+            {sec.items.map((i) => (
+              <Link
+                key={i.path}
+                to={i.path as never}
+                onClick={onClose}
+                className="flex min-h-14 items-center justify-between gap-3 border-b border-line py-3"
+              >
+                <span className="font-display text-[17px]">{i.name}</span>
+                <span className="max-w-[55%] text-right text-xs leading-snug text-muted">{i.blurb}</span>
+              </Link>
+            ))}
+          </section>
         ))}
       </div>
-      {children}
+    </div>
+  );
+}
+
+export function SaveChartButton() {
+  const saveDraft = useChartStore((s) => s.saveDraft);
+  const saveAsNew = useChartStore((s) => s.saveAsNew);
+  const [msg, setMsg] = useState("");
+  return (
+    <div className="flex items-center">
+      <button
+        type="button"
+        className="h-11 min-w-11 px-2 text-sm text-muted"
+        onClick={() => {
+          saveAsNew();
+          setMsg("另存");
+          window.setTimeout(() => setMsg(""), 1600);
+        }}
+      >
+        另存
+      </button>
+      <button
+        type="button"
+        className="h-11 min-w-11 px-3 text-sm text-cinnabar transition-transform duration-150 ease-out active:scale-[0.96]"
+        onClick={() => {
+          saveDraft();
+          setMsg("已存");
+          window.setTimeout(() => setMsg(""), 1600);
+        }}
+      >
+        {msg || "保存"}
+      </button>
     </div>
   );
 }
@@ -52,16 +152,40 @@ export function Workbench({
   params,
   canvas,
   panel,
+  labels,
 }: {
   params?: React.ReactNode;
   canvas: React.ReactNode;
   panel: React.ReactNode;
+  labels?: { canvas?: string; params?: string; panel?: string };
 }) {
+  const [tab, setTab] = useState<"canvas" | "params" | "panel">("canvas");
+  const tabs: { id: "canvas" | "params" | "panel"; label: string }[] = [
+    { id: "canvas", label: labels?.canvas ?? "盘面" },
+    ...(params ? [{ id: "params" as const, label: labels?.params ?? "出生" }] : []),
+    { id: "panel", label: labels?.panel ?? "详解" },
+  ];
   return (
-    <div className={cn("workbench", !params && "workbench-noparams")}>
-      {params ? <div className="wb-params">{params}</div> : null}
-      <div className="wb-canvas">{canvas}</div>
-      <div className="wb-panel">{panel}</div>
+    <div>
+      <div className="wb-mobile-tabs" role="tablist" aria-label="盘面分区">
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            className={cn("wb-tab", tab === t.id && "is-on")}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+      <div className={cn("workbench", !params && "workbench-noparams")}>
+        {params ? <div className={cn("wb-params", tab !== "params" && "wb-hide-sm")}>{params}</div> : null}
+        <div className={cn("wb-canvas", tab !== "canvas" && "wb-hide-sm")}>{canvas}</div>
+        <div className={cn("wb-panel", tab !== "panel" && "wb-hide-sm")}>{panel}</div>
+      </div>
     </div>
   );
 }
@@ -80,7 +204,7 @@ export function FieldInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
     <input
       {...props}
       className={cn(
-        "h-11 w-full border-0 border-b border-line bg-transparent px-0 text-[15px] text-ink outline-none",
+        "h-12 w-full rounded-sm border-0 border-b border-line bg-transparent px-0 text-base text-ink outline-none",
         "placeholder:text-faint focus:border-ink",
         props.className,
       )}
@@ -93,7 +217,7 @@ export function FieldSelect(props: React.SelectHTMLAttributes<HTMLSelectElement>
     <select
       {...props}
       className={cn(
-        "h-11 w-full appearance-none border-0 border-b border-line bg-transparent px-0 text-[15px] text-ink outline-none focus:border-ink",
+        "h-12 w-full appearance-none rounded-sm border-0 border-b border-line bg-transparent px-0 text-base text-ink outline-none focus:border-ink",
         props.className,
       )}
     />
@@ -108,7 +232,7 @@ export function Primary({
     <button
       {...props}
       className={cn(
-        "h-12 w-full bg-ink text-[15px] font-medium text-bg transition-transform duration-150 ease-out active:scale-[0.96] disabled:opacity-40",
+        "h-12 w-full rounded-md bg-ink text-[15px] font-medium text-bg transition-transform duration-150 ease-out active:scale-[0.98] disabled:opacity-40",
         props.className,
       )}
     >
@@ -125,7 +249,7 @@ export function Ghost({
     <button
       {...props}
       className={cn(
-        "h-12 w-full text-[15px] font-medium text-ink transition-transform duration-150 ease-out active:scale-[0.96]",
+        "h-12 w-full rounded-md text-[15px] font-medium text-ink transition-transform duration-150 ease-out active:scale-[0.98]",
         props.className,
       )}
     >
@@ -183,7 +307,7 @@ export function Chip({
       type="button"
       onClick={onClick}
       className={cn(
-        "h-11 shrink-0 px-3 text-sm transition-colors duration-150 md:h-9",
+        "h-11 shrink-0 rounded-sm px-3.5 text-sm transition-colors duration-150 md:h-10",
         active ? "bg-ink text-bg" : "text-muted hover:text-ink",
       )}
     >
@@ -209,7 +333,7 @@ export function QuietTabs({
           type="button"
           onClick={() => onChange(t)}
           className={cn(
-            "h-10 shrink-0 border-b px-3 text-sm",
+            "h-11 shrink-0 border-b px-3.5 text-sm",
             value === t ? "border-ink text-ink" : "border-transparent text-muted",
           )}
         >
@@ -237,10 +361,10 @@ export function Fold({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex min-h-11 w-full items-center justify-between gap-3 py-2.5 text-left"
+        className="flex min-h-12 w-full items-center justify-between gap-3 py-2.5 text-left"
       >
-        <span className="text-[11px] tracking-[0.18em] text-muted">{title}</span>
-        <span className="shrink-0 text-[11px] text-faint">
+        <span className="text-xs tracking-wide text-muted">{title}</span>
+        <span className="shrink-0 text-xs text-faint">
           {badge ? `${badge} · ` : ""}
           {open ? "收起" : "展开"}
         </span>
@@ -270,9 +394,7 @@ export function PanelSections({
 }
 
 export function ChartSplit({ chart, children }: { chart: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <Workbench canvas={chart} panel={children} />
-  );
+  return <Workbench canvas={chart} panel={children} />;
 }
 
 export function Interpret({ kind, summary }: { kind: string; summary: string }) {

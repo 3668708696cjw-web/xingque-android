@@ -36,6 +36,28 @@ function Page() {
             <PanelSections
               sections={[
                 {
+                  id: "大运",
+                  content: (
+                    <ul>
+                      {data.dayun.map((y) => (
+                        <li
+                          key={y.startYear}
+                          className={cn("flex justify-between border-b border-line py-2 text-sm", y.current && "text-ink")}
+                        >
+                          <span>
+                            {y.ganzhi}
+                            <span className="ml-2 text-xs text-muted">{y.shishen}</span>
+                            {y.current ? " · 当前" : ""}
+                          </span>
+                          <span className="tabular-nums text-muted">
+                            {y.startAge}–{y.endAge}岁
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ),
+                },
+                {
                   id: "流年",
                   content: (
                     <ul>

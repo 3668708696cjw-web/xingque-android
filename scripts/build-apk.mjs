@@ -14,7 +14,7 @@ const androidHome = process.env.ANDROID_HOME || "/opt/android-sdk";
 const dist = join(root, "dist-apk");
 const artifacts = join(root, "artifacts");
 const keystore = join(root, "android-release.keystore");
-const apkName = "Xingque-offline-4.0.0.apk";
+const apkName = "Xingque-offline-5.0.0.apk";
 
 function run(cmd, args, opts = {}) {
   console.log(`$ ${cmd} ${args.join(" ")}`);
@@ -113,11 +113,11 @@ writeFileSync(join(root, "android/local.properties"), `sdk.dir=${androidHome}\n`
 console.log("==> cap sync android");
 run("npx", ["cap", "sync", "android"]);
 
-const epheSrc = join(root, "data/ephe");
+const epheSrc = join(root, "data/ephe-core");
 const assetsPublic = join(root, "android/app/src/main/assets/public");
 if (existsSync(epheSrc) && existsSync(assetsPublic)) {
   const dest = join(assetsPublic, "ephe");
-  console.log("==> copy ephe into android assets");
+  console.log("==> copy ephe-core (century files only) into android assets");
   rmSync(dest, { recursive: true, force: true });
   mkdirSync(dest, { recursive: true });
   cpSync(epheSrc, dest, { recursive: true });
@@ -125,16 +125,22 @@ if (existsSync(epheSrc) && existsSync(assetsPublic)) {
   if (existsSync(wasm)) copyFileSync(wasm, join(assetsPublic, "swisseph.wasm"));
   const ast = join(root, "public/asteroids.json");
   if (existsSync(ast)) copyFileSync(ast, join(assetsPublic, "asteroids.json"));
+  const celebs = join(root, "public/celebs.json");
+  if (existsSync(celebs)) copyFileSync(celebs, join(assetsPublic, "celebs.json"));
   let bytes = 0;
+  let files = 0;
   const walkSize = (d) => {
     for (const name of readdirSync(d, { withFileTypes: true })) {
       const p = join(d, name.name);
       if (name.isDirectory()) walkSize(p);
-      else bytes += statSync(p).size;
+      else {
+        bytes += statSync(p).size;
+        files += 1;
+      }
     }
   };
   walkSize(dest);
-  console.log("ephe assets bytes:", bytes);
+  console.log("ephe-core assets files:", files, "bytes:", bytes);
 }
 
 if (!existsSync(keystore)) {
@@ -185,20 +191,15 @@ if (!gradle.includes("xingqueoffline")) {
   writeFileSync(appGradle, gradle);
 }
 
-if (!gradle.includes("noCompress 'se1'")) {
-  gradle = readFileSync(appGradle, "utf8");
-  if (gradle.includes("ignoreAssetsPattern") && !gradle.includes("noCompress 'se1'")) {
-    gradle = gradle.replace(
-      /ignoreAssetsPattern[^\n]*/,
-      (m) => `${m}\n            noCompress 'se1', 'eph', 'txt', 'wasm', 'json'`,
-    );
-    writeFileSync(appGradle, gradle);
-  }
+gradle = readFileSync(appGradle, "utf8");
+if (gradle.includes("noCompress")) {
+  gradle = gradle.replace(/\n\s*noCompress[^\n]*/g, "");
+  writeFileSync(appGradle, gradle);
 }
 gradle = readFileSync(appGradle, "utf8");
-if (gradle.includes('versionName "2.0"') || gradle.includes('versionName "3.0"') || gradle.includes("versionCode 9") || gradle.includes("versionCode 10")) {
-  gradle = gradle.replace(/versionCode \d+/, "versionCode 11");
-  gradle = gradle.replace(/versionName "[^"]+"/, 'versionName "4.0"');
+if (!gradle.includes('versionName "5.0"') || !gradle.includes("versionCode 12")) {
+  gradle = gradle.replace(/versionCode \d+/, "versionCode 12");
+  gradle = gradle.replace(/versionName "[^"]+"/, 'versionName "5.0"');
   writeFileSync(appGradle, gradle);
 }
 
@@ -240,7 +241,10 @@ try {
   copyFileSync(srcApk, dest);
   copyFileSync(srcApk, join(artifacts, "星阙-本地离线.apk"));
 } catch (e) {
-  console.warn("artifacts FUSE cannot hold GB APK; download from GitHub release. ", e);
-  writeFileSync(join(artifacts, "DOWNLOAD.txt"), `Xingque-offline-4.0.0.apk\nhttps://github.com/3668708696cjw-web/xingque-android/releases/tag/v4.0.0\nsize ${statSync(srcApk).size}\n`);
+  console.warn("artifacts FUSE cannot hold large APK; download from GitHub release. ", e);
+  writeFileSync(
+    join(artifacts, "DOWNLOAD.txt"),
+    `Xingque-offline-5.0.0.apk\nhttps://github.com/3668708696cjw-web/xingque-android/releases/tag/v5.0.0\nsize ${statSync(srcApk).size}\n编号小行星请另下 Xingque-ephe-ast0/1/2.zip，在 App「小行星」页导入。\n`,
+  );
 }
 console.log("APK ready:", srcApk, statSync(srcApk).size);

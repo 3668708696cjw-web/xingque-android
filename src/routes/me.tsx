@@ -1,5 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
+import { OpenWith } from "@/components/ops";
+import { Primary } from "@/components/kit";
 import { useChartStore } from "@/lib/horosa/store";
 import { birthLabel, type SavedChart } from "@/lib/horosa/types";
 import { cityOf } from "@/lib/horosa/cities";
@@ -23,9 +25,13 @@ export function Me() {
   const loadChart = useChartStore((s) => s.loadChart);
   const removeChart = useChartStore((s) => s.removeChart);
   const importCharts = useChartStore((s) => s.importCharts);
+  const setNow = useChartStore((s) => s.setNow);
+  const saveDraft = useChartStore((s) => s.saveDraft);
+  const setPartner = useChartStore((s) => s.setPartner);
   const nav = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState("");
+  const [openId, setOpenId] = useState<string | null>(null);
 
   function exportCharts() {
     const payload = {
@@ -58,33 +64,68 @@ export function Me() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-6 pb-8 pt-10 md:px-8">
-      <h1 className="font-display text-[32px] font-medium tracking-tight">我</h1>
-      <p className="mt-2 text-[13px] text-muted">本地离线版。无账号，命例不离机。</p>
+    <main className="mx-auto max-w-3xl px-5 pb-8 pt-8 md:px-8">
+      <h1 className="font-display text-3xl font-medium tracking-tight">命例</h1>
+      <p className="mt-2 text-sm text-muted">本地离线。点一条，用任一技法打开。无账号。</p>
 
-      <section className="mt-10">
-        <h2 className="text-[11px] tracking-wide text-muted">命例</h2>
+      <section className="mt-8">
         {charts.length === 0 ? (
-          <p className="mt-4 text-[15px] text-muted">还没有保存的盘。在排盘页起盘即保存。</p>
-        ) : (
-          charts.map((c) => (
-            <div key={c.id} className="flex items-center justify-between gap-3 border-b border-line py-4">
-              <button
+          <div>
+            <p className="text-[15px] leading-7 text-muted">还没有保存的盘。用此刻起一盘，或到排盘里填出生时间。</p>
+            <div className="mt-5">
+              <Primary
                 type="button"
-                className="text-left"
                 onClick={() => {
-                  loadChart(c.id);
+                  setNow();
+                  saveDraft();
                   nav({ to: "/natal" });
                 }}
               >
-                <div className="font-display text-[17px]">{c.name || "未名"}</div>
-                <div className="text-[12px] text-muted">
-                  {birthLabel(c)} · {cityOf(c).name}
+                看此刻的盘
+              </Primary>
+            </div>
+          </div>
+        ) : (
+          charts.map((c) => (
+            <div key={c.id} className="border-b border-line py-4">
+              <button
+                type="button"
+                className="flex w-full items-baseline justify-between gap-3 text-left"
+                onClick={() => {
+                  loadChart(c.id);
+                  setOpenId(openId === c.id ? null : c.id);
+                }}
+              >
+                <span>
+                  <span className="block font-display text-[17px]">{c.name || "未名"}</span>
+                  <span className="mt-0.5 block text-xs text-muted">
+                    {birthLabel(c)} · {cityOf(c).name} · {c.gender === "male" ? "男" : "女"}
+                  </span>
+                </span>
+                <span className="text-xs text-faint">{openId === c.id ? "收起" : "打开"}</span>
+              </button>
+              {openId === c.id ? (
+                <div className="mt-3">
+                  <p className="mb-1 text-[11px] tracking-wide text-muted">用此命例排</p>
+                  <OpenWith />
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      className="h-11 px-3 text-sm text-muted"
+                      onClick={() => {
+                        setPartner(c.id);
+                        loadChart(c.id);
+                        nav({ to: "/synastry" });
+                      }}
+                    >
+                      设为合盘对象
+                    </button>
+                    <button type="button" className="ml-auto h-11 px-3 text-sm text-faint" onClick={() => removeChart(c.id)}>
+                      删除
+                    </button>
+                  </div>
                 </div>
-              </button>
-              <button type="button" className="text-[12px] text-faint" onClick={() => removeChart(c.id)}>
-                删除
-              </button>
+              ) : null}
             </div>
           ))
         )}
@@ -93,13 +134,17 @@ export function Me() {
       <section className="mt-10 flex gap-3">
         <button
           type="button"
-          className="h-11 flex-1 border border-line text-[14px]"
+          className="h-12 flex-1 rounded-md border border-line text-[14px]"
           onClick={exportCharts}
           disabled={!charts.length}
         >
           导出命例
         </button>
-        <button type="button" className="h-11 flex-1 border border-line text-[14px]" onClick={() => fileRef.current?.click()}>
+        <button
+          type="button"
+          className="h-12 flex-1 rounded-md border border-line text-[14px]"
+          onClick={() => fileRef.current?.click()}
+        >
           导入
         </button>
         <input
@@ -114,18 +159,18 @@ export function Me() {
           }}
         />
       </section>
-      {msg ? <p className="mt-3 text-[12px] text-muted">{msg}</p> : null}
+      {msg ? <p className="mt-3 text-xs text-muted">{msg}</p> : null}
 
-      <nav className="mt-12 space-y-4 text-[15px]">
-        <Link to="/about" className="block">
+      <nav className="mt-12 space-y-1 text-[15px]">
+        <Link to="/about" className="flex h-12 items-center border-b border-line">
           关于星阙
         </Link>
-        <Link to="/celebs" className="block">
+        <Link to="/celebs" className="flex h-12 items-center border-b border-line">
           名人库
         </Link>
-        <a href="?install=1" className="block">
-          安装到主屏幕
-        </a>
+        <Link to="/asteroids" className="flex h-12 items-center border-b border-line">
+          小行星星历包
+        </Link>
       </nav>
     </main>
   );

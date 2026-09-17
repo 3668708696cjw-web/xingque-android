@@ -88,28 +88,32 @@ export function NatalWheel({
   outer,
   modern = true,
   style = "wheel",
+  minors = true,
   onSelect,
 }: {
   chart: NatalChart;
   outer?: NatalChart;
   modern?: boolean;
   style?: WheelStyle;
+  minors?: boolean;
   onSelect?: (key: PlanetKey) => void;
 }) {
-  if (style === "north") return <NorthIndian chart={chart} modern={modern} onSelect={onSelect} />;
-  if (style === "square") return <SquareChart chart={chart} modern={modern} onSelect={onSelect} />;
-  return <RoundWheel chart={chart} outer={outer} modern={modern} onSelect={onSelect} />;
+  if (style === "north") return <NorthIndian chart={chart} modern={modern} minors={minors} onSelect={onSelect} />;
+  if (style === "square") return <SquareChart chart={chart} modern={modern} minors={minors} onSelect={onSelect} />;
+  return <RoundWheel chart={chart} outer={outer} modern={modern} minors={minors} onSelect={onSelect} />;
 }
 
 function RoundWheel({
   chart,
   outer,
   modern,
+  minors = true,
   onSelect,
 }: {
   chart: NatalChart;
   outer?: NatalChart;
   modern: boolean;
+  minors?: boolean;
   onSelect?: (key: PlanetKey) => void;
 }) {
   const size = 1000;
@@ -128,8 +132,8 @@ function RoundWheel({
   const R_LABEL = 484;
 
   const toScreen = (lon: number) => norm360(chart.asc - lon);
-  const planets = visiblePlanets(chart, modern);
-  const outerPlanets = outer ? visiblePlanets(outer, modern) : [];
+  const planets = visiblePlanets(chart, modern, minors);
+  const outerPlanets = outer ? visiblePlanets(outer, modern, minors) : [];
   const minGap = 14;
   const disp = decluster(
     planets.map((p) => p.lon),
@@ -334,13 +338,15 @@ function houseOfWhole(lon: number, asc: number) {
 function NorthIndian({
   chart,
   modern,
+  minors = true,
   onSelect,
 }: {
   chart: NatalChart;
   modern: boolean;
+  minors?: boolean;
   onSelect?: (key: PlanetKey) => void;
 }) {
-  const planets = visiblePlanets(chart, modern);
+  const planets = visiblePlanets(chart, modern, minors);
   const byHouse: PlanetPos[][] = Array.from({ length: 12 }, () => []);
   planets.forEach((p) => {
     byHouse[houseOfWhole(p.lon, chart.asc) - 1].push(p);
@@ -400,13 +406,15 @@ function NorthIndian({
 function SquareChart({
   chart,
   modern,
+  minors = true,
   onSelect,
 }: {
   chart: NatalChart;
   modern: boolean;
+  minors?: boolean;
   onSelect?: (key: PlanetKey) => void;
 }) {
-  const planets = visiblePlanets(chart, modern);
+  const planets = visiblePlanets(chart, modern, minors);
   const byHouse: PlanetPos[][] = Array.from({ length: 12 }, () => []);
   planets.forEach((p) => {
     byHouse[p.house - 1].push(p);
@@ -452,8 +460,8 @@ function SquareChart({
   );
 }
 
-export function AspectGrid({ chart, modern = true }: { chart: NatalChart; modern?: boolean }) {
-  const list = visiblePlanets(chart, modern);
+export function AspectGrid({ chart, modern = true, minors = true }: { chart: NatalChart; modern?: boolean; minors?: boolean }) {
+  const list = visiblePlanets(chart, modern, minors);
   const map = new Map<string, string>();
   chart.aspects.forEach((a) => {
     map.set(`${a.a}|${a.b}`, a.typeZh);

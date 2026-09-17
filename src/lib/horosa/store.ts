@@ -14,6 +14,14 @@ const EMPTY: BirthInput = {
   cityId: "taipei",
 };
 
+type Shift = {
+  years?: number;
+  months?: number;
+  days?: number;
+  hours?: number;
+  minutes?: number;
+};
+
 type State = {
   draft: BirthInput;
   charts: SavedChart[];
@@ -23,8 +31,10 @@ type State = {
   setHydrated: (v: boolean) => void;
   setDraft: (p: Partial<BirthInput>) => void;
   setNow: () => void;
+  shiftDraft: (delta: Shift) => void;
   loadChart: (id: string) => void;
   saveDraft: () => string;
+  saveAsNew: () => string;
   removeChart: (id: string) => void;
   setPartner: (id: string | null) => void;
   importCharts: (incoming: SavedChart[]) => number;
@@ -51,6 +61,26 @@ export const useChartStore = create<State>()(
             day: n.day,
             hour: n.hour,
             minute: n.minute,
+            name: cur.name || "此刻",
+          },
+        });
+      },
+      shiftDraft: (delta) => {
+        const d = get().draft;
+        const dt = new Date(d.year, d.month - 1, d.day, d.hour, d.minute);
+        if (delta.years) dt.setFullYear(dt.getFullYear() + delta.years);
+        if (delta.months) dt.setMonth(dt.getMonth() + delta.months);
+        if (delta.days) dt.setDate(dt.getDate() + delta.days);
+        if (delta.hours) dt.setHours(dt.getHours() + delta.hours);
+        if (delta.minutes) dt.setMinutes(dt.getMinutes() + delta.minutes);
+        set({
+          draft: {
+            ...d,
+            year: dt.getFullYear(),
+            month: dt.getMonth() + 1,
+            day: dt.getDate(),
+            hour: dt.getHours(),
+            minute: dt.getMinutes(),
           },
         });
       },
@@ -69,6 +99,13 @@ export const useChartStore = create<State>()(
           });
           return existing.id;
         }
+        const id = crypto.randomUUID();
+        const saved: SavedChart = { ...draft, id, createdAt: Date.now() };
+        set({ charts: [saved, ...charts], activeId: id });
+        return id;
+      },
+      saveAsNew: () => {
+        const { draft, charts } = get();
         const id = crypto.randomUUID();
         const saved: SavedChart = { ...draft, id, createdAt: Date.now() };
         set({ charts: [saved, ...charts], activeId: id });

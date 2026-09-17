@@ -1,19 +1,34 @@
-# 星阙 · 本地离线安卓版 2.0
+# 星阙 · 本地离线 Android
 
-按 Windows 端 [Horosa](https://github.com/Horace-Maxwell/Horosa-Web-App-comprehensively-improved-Windows) 导航全套重写目录。忽略 Flutter 前端壳。全部本机演算，不登录、不联网。
+对照 Windows 星阙（Horace-Maxwell 整合版）的命 / 卜 / 工具，收成可离线安装的 Android 应用。不含 AI、3D、直播、管理。
 
-## 下载
+## 下载（请用 v5，不要下 v4）
 
-**[Xingque-offline-2.0.0.apk](https://github.com/3668708696cjw-web/xingque-android/releases/download/v2.0.0/Xingque-offline-2.0.0.apk)**
+发行页：<https://github.com/3668708696cjw-web/xingque-android/releases/tag/v5.0.0>
 
-覆盖安装。包名 `app.xingque.offline` · Android 5.1+
+| 文件 | 用途 |
+| --- | --- |
+| `Xingque-offline-5.0.0.apk` | 应用本体。世纪星历已打进包，本命、过运、八字、紫微、奇门等可直接离线用。 |
+| `Xingque-ephe-ast0.zip` | 编号小行星 0–999 星历包（可选） |
+| `Xingque-ephe-ast1.zip` | 编号小行星 1000–1999（可选） |
+| `Xingque-ephe-ast2.zip` | 编号小行星 2000+（可选） |
 
-## 模块（对照 Windows navigationPages）
+**v4 的 1.8 GB 整包会卡在下载最后一秒**，因为把三千多个未压缩星历文件塞进同一个 APK。v5 改成：应用约百兆可下完；编号星按需在「小行星」页从 zip 装入本机。
 
-命：占星、星运、八字、紫微、七政、印占、辅盘（点/谐波/龙盘/卜卦/ACG/骰子）、合盘、数算、演禽
+装星历包：打开 App → 排盘 → 小行星 → 从文件装入星历包。
 
-卜：三式、六壬、遁甲、六爻、太乙、分至、风水、塔罗、金口、太玄、地占、五兆、荆诀、小六壬、飞宫、小成图、灵棋
+## 用法
 
-工具：玄学史、黄历、择日、天文馆、辅助、数据库
+- 今日页「看此刻的盘」用系统时间起本命。
+- 每个技法页可以加减年/月/日/时，或点「此刻」。出生时间跟着走，点「技法」换盘式。
+- 命例存在本机。导出 / 导入 JSON。无账号、不联网。
 
-不含：AI 分析、3D 星盘、直播、管理、Swiss 星历。那些在 Windows 桌面端。
+## 技法
+
+命：占星、星运（过运 / 法达 / 十年 / 黄道星释 / 日返月返 / 推进）、八字（含大运流年）、紫微、七政、印占、辅盘、合盘（比较 / 组合 / 时空中点）、小行星、汉堡、主限（奈博 / 托勒密）、数算、演禽。
+
+卜：三式、统摄、六壬、遁甲、六爻、太乙、分至、风水、塔罗、金口、太玄、地占、五兆、荆诀、小六壬、飞宫、小成图、灵棋。
+
+工具：玄学史、黄历、择日十技法、天文馆、辅助、名人库。
+
+行星优先 Swiss Ephemeris（本机 se1），缺文件时回落 astronomy-engine。历法 lunar-javascript，紫微 iztro。
