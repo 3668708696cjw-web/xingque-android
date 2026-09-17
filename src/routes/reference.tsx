@@ -8,7 +8,7 @@ export const Route = createFileRoute("/reference")({ component: Page });
 
 function Page() {
   return (
-    <Screen title="类象">
+    <Screen title="辅助">
       <Block title="八卦">
         {BAGUA.map((b) => (
           <div key={b.name} className="border-b border-line py-3">

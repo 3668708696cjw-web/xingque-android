@@ -125,6 +125,7 @@ declare module "lunar-javascript" {
     getFestivals(): string[];
     getOtherFestivals(): string[];
     getJieQi(): string;
+    getJieQiTable(): Record<string, Solar>;
     getPrevJieQi(whole: boolean): JieQi;
     getNextJieQi(whole: boolean): JieQi;
     getPrevJieQiList?(): JieQi[];

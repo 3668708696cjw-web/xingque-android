@@ -15,7 +15,7 @@ function Page() {
   const [dingju, setDingju] = useState<"拆补" | "置闰">("拆补");
   const data = useMemo(() => computeQimen(draft, { mode, dingju }), [draft, mode, dingju]);
   return (
-    <Screen title="奇门">
+    <Screen title="遁甲">
       <Workbench
         params={<BirthPanel submitLabel="排盘" />}
         canvas={

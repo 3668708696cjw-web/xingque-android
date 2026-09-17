@@ -18,7 +18,7 @@ function Page() {
     return CELEBS.filter((c) => c.name.includes(s) || c.who.includes(s) || c.note.includes(s));
   }, [deferred]);
   return (
-    <Screen title="名人">
+    <Screen title="数据库">
       <p className="mb-4 text-[13px] text-muted">公开出生数据，时地或为谱录近似。点选后进入占星。</p>
       <input
         value={q}

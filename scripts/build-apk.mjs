@@ -14,7 +14,7 @@ const androidHome = process.env.ANDROID_HOME || "/opt/android-sdk";
 const dist = join(root, "dist-apk");
 const artifacts = join(root, "artifacts");
 const keystore = join(root, "android-release.keystore");
-const apkName = "Xingque-offline-1.7.0.apk";
+const apkName = "Xingque-offline-2.0.0.apk";
 
 function run(cmd, args, opts = {}) {
   console.log(`$ ${cmd} ${args.join(" ")}`);

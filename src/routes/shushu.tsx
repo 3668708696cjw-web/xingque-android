@@ -11,7 +11,7 @@ function Page() {
   const draft = useChartStore((s) => s.draft);
   const data = useMemo(() => computeShushu(draft), [draft]);
   return (
-    <Screen title="数术">
+    <Screen title="数算">
       <Workbench
         params={<BirthPanel />}
         canvas={

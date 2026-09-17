@@ -15,13 +15,18 @@ import { Route as AlmanacRouteImport } from './routes/almanac'
 import { Route as BaziRouteImport } from './routes/bazi'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as CelebsRouteImport } from './routes/celebs'
+import { Route as FeigongRouteImport } from './routes/feigong'
 import { Route as FengshuiRouteImport } from './routes/fengshui'
 import { Route as GeomancyRouteImport } from './routes/geomancy'
 import { Route as HistoryRouteImport } from './routes/history'
+import { Route as JieqiRouteImport } from './routes/jieqi'
+import { Route as JingjueRouteImport } from './routes/jingjue'
 import { Route as JinkouRouteImport } from './routes/jinkou'
+import { Route as LingqiRouteImport } from './routes/lingqi'
 import { Route as LiurenRouteImport } from './routes/liuren'
 import { Route as LiuyaoRouteImport } from './routes/liuyao'
 import { Route as MeRouteImport } from './routes/me'
+import { Route as MingotherRouteImport } from './routes/mingother'
 import { Route as NatalRouteImport } from './routes/natal'
 import { Route as PartsRouteImport } from './routes/parts'
 import { Route as QimenRouteImport } from './routes/qimen'
@@ -36,6 +41,10 @@ import { Route as TaiyiRouteImport } from './routes/taiyi'
 import { Route as TarotRouteImport } from './routes/tarot'
 import { Route as TransitsRouteImport } from './routes/transits'
 import { Route as VedicRouteImport } from './routes/vedic'
+import { Route as WuzhaoRouteImport } from './routes/wuzhao'
+import { Route as XiaochengRouteImport } from './routes/xiaocheng'
+import { Route as XiaoliurenRouteImport } from './routes/xiaoliuren'
+import { Route as ZeriRouteImport } from './routes/zeri'
 import { Route as ZiweiRouteImport } from './routes/ziwei'
 import { Route as HistoryIdRouteImport } from './routes/history.$id'
 
@@ -69,6 +78,11 @@ const CelebsRoute = CelebsRouteImport.update({
   path: '/celebs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FeigongRoute = FeigongRouteImport.update({
+  id: '/feigong',
+  path: '/feigong',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FengshuiRoute = FengshuiRouteImport.update({
   id: '/fengshui',
   path: '/fengshui',
@@ -84,9 +98,24 @@ const HistoryRoute = HistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JieqiRoute = JieqiRouteImport.update({
+  id: '/jieqi',
+  path: '/jieqi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JingjueRoute = JingjueRouteImport.update({
+  id: '/jingjue',
+  path: '/jingjue',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JinkouRoute = JinkouRouteImport.update({
   id: '/jinkou',
   path: '/jinkou',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LingqiRoute = LingqiRouteImport.update({
+  id: '/lingqi',
+  path: '/lingqi',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LiurenRoute = LiurenRouteImport.update({
@@ -102,6 +131,11 @@ const LiuyaoRoute = LiuyaoRouteImport.update({
 const MeRoute = MeRouteImport.update({
   id: '/me',
   path: '/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MingotherRoute = MingotherRouteImport.update({
+  id: '/mingother',
+  path: '/mingother',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NatalRoute = NatalRouteImport.update({
@@ -174,6 +208,26 @@ const VedicRoute = VedicRouteImport.update({
   path: '/vedic',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WuzhaoRoute = WuzhaoRouteImport.update({
+  id: '/wuzhao',
+  path: '/wuzhao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const XiaochengRoute = XiaochengRouteImport.update({
+  id: '/xiaocheng',
+  path: '/xiaocheng',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const XiaoliurenRoute = XiaoliurenRouteImport.update({
+  id: '/xiaoliuren',
+  path: '/xiaoliuren',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ZeriRoute = ZeriRouteImport.update({
+  id: '/zeri',
+  path: '/zeri',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ZiweiRoute = ZiweiRouteImport.update({
   id: '/ziwei',
   path: '/ziwei',
@@ -192,13 +246,18 @@ export interface FileRoutesByFullPath {
   '/bazi': typeof BaziRoute
   '/catalog': typeof CatalogRoute
   '/celebs': typeof CelebsRoute
+  '/feigong': typeof FeigongRoute
   '/fengshui': typeof FengshuiRoute
   '/geomancy': typeof GeomancyRoute
   '/history': typeof HistoryRouteWithChildren
+  '/jieqi': typeof JieqiRoute
+  '/jingjue': typeof JingjueRoute
   '/jinkou': typeof JinkouRoute
+  '/lingqi': typeof LingqiRoute
   '/liuren': typeof LiurenRoute
   '/liuyao': typeof LiuyaoRoute
   '/me': typeof MeRoute
+  '/mingother': typeof MingotherRoute
   '/natal': typeof NatalRoute
   '/parts': typeof PartsRoute
   '/qimen': typeof QimenRoute
@@ -213,6 +272,10 @@ export interface FileRoutesByFullPath {
   '/tarot': typeof TarotRoute
   '/transits': typeof TransitsRoute
   '/vedic': typeof VedicRoute
+  '/wuzhao': typeof WuzhaoRoute
+  '/xiaocheng': typeof XiaochengRoute
+  '/xiaoliuren': typeof XiaoliurenRoute
+  '/zeri': typeof ZeriRoute
   '/ziwei': typeof ZiweiRoute
   '/history/$id': typeof HistoryIdRoute
 }
@@ -223,13 +286,18 @@ export interface FileRoutesByTo {
   '/bazi': typeof BaziRoute
   '/catalog': typeof CatalogRoute
   '/celebs': typeof CelebsRoute
+  '/feigong': typeof FeigongRoute
   '/fengshui': typeof FengshuiRoute
   '/geomancy': typeof GeomancyRoute
   '/history': typeof HistoryRouteWithChildren
+  '/jieqi': typeof JieqiRoute
+  '/jingjue': typeof JingjueRoute
   '/jinkou': typeof JinkouRoute
+  '/lingqi': typeof LingqiRoute
   '/liuren': typeof LiurenRoute
   '/liuyao': typeof LiuyaoRoute
   '/me': typeof MeRoute
+  '/mingother': typeof MingotherRoute
   '/natal': typeof NatalRoute
   '/parts': typeof PartsRoute
   '/qimen': typeof QimenRoute
@@ -244,6 +312,10 @@ export interface FileRoutesByTo {
   '/tarot': typeof TarotRoute
   '/transits': typeof TransitsRoute
   '/vedic': typeof VedicRoute
+  '/wuzhao': typeof WuzhaoRoute
+  '/xiaocheng': typeof XiaochengRoute
+  '/xiaoliuren': typeof XiaoliurenRoute
+  '/zeri': typeof ZeriRoute
   '/ziwei': typeof ZiweiRoute
   '/history/$id': typeof HistoryIdRoute
 }
@@ -255,13 +327,18 @@ export interface FileRoutesById {
   '/bazi': typeof BaziRoute
   '/catalog': typeof CatalogRoute
   '/celebs': typeof CelebsRoute
+  '/feigong': typeof FeigongRoute
   '/fengshui': typeof FengshuiRoute
   '/geomancy': typeof GeomancyRoute
   '/history': typeof HistoryRouteWithChildren
+  '/jieqi': typeof JieqiRoute
+  '/jingjue': typeof JingjueRoute
   '/jinkou': typeof JinkouRoute
+  '/lingqi': typeof LingqiRoute
   '/liuren': typeof LiurenRoute
   '/liuyao': typeof LiuyaoRoute
   '/me': typeof MeRoute
+  '/mingother': typeof MingotherRoute
   '/natal': typeof NatalRoute
   '/parts': typeof PartsRoute
   '/qimen': typeof QimenRoute
@@ -276,6 +353,10 @@ export interface FileRoutesById {
   '/tarot': typeof TarotRoute
   '/transits': typeof TransitsRoute
   '/vedic': typeof VedicRoute
+  '/wuzhao': typeof WuzhaoRoute
+  '/xiaocheng': typeof XiaochengRoute
+  '/xiaoliuren': typeof XiaoliurenRoute
+  '/zeri': typeof ZeriRoute
   '/ziwei': typeof ZiweiRoute
   '/history/$id': typeof HistoryIdRoute
 }
@@ -288,13 +369,18 @@ export interface FileRouteTypes {
     | '/bazi'
     | '/catalog'
     | '/celebs'
+    | '/feigong'
     | '/fengshui'
     | '/geomancy'
     | '/history'
+    | '/jieqi'
+    | '/jingjue'
     | '/jinkou'
+    | '/lingqi'
     | '/liuren'
     | '/liuyao'
     | '/me'
+    | '/mingother'
     | '/natal'
     | '/parts'
     | '/qimen'
@@ -309,6 +395,10 @@ export interface FileRouteTypes {
     | '/tarot'
     | '/transits'
     | '/vedic'
+    | '/wuzhao'
+    | '/xiaocheng'
+    | '/xiaoliuren'
+    | '/zeri'
     | '/ziwei'
     | '/history/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -319,13 +409,18 @@ export interface FileRouteTypes {
     | '/bazi'
     | '/catalog'
     | '/celebs'
+    | '/feigong'
     | '/fengshui'
     | '/geomancy'
     | '/history'
+    | '/jieqi'
+    | '/jingjue'
     | '/jinkou'
+    | '/lingqi'
     | '/liuren'
     | '/liuyao'
     | '/me'
+    | '/mingother'
     | '/natal'
     | '/parts'
     | '/qimen'
@@ -340,6 +435,10 @@ export interface FileRouteTypes {
     | '/tarot'
     | '/transits'
     | '/vedic'
+    | '/wuzhao'
+    | '/xiaocheng'
+    | '/xiaoliuren'
+    | '/zeri'
     | '/ziwei'
     | '/history/$id'
   id:
@@ -350,13 +449,18 @@ export interface FileRouteTypes {
     | '/bazi'
     | '/catalog'
     | '/celebs'
+    | '/feigong'
     | '/fengshui'
     | '/geomancy'
     | '/history'
+    | '/jieqi'
+    | '/jingjue'
     | '/jinkou'
+    | '/lingqi'
     | '/liuren'
     | '/liuyao'
     | '/me'
+    | '/mingother'
     | '/natal'
     | '/parts'
     | '/qimen'
@@ -371,6 +475,10 @@ export interface FileRouteTypes {
     | '/tarot'
     | '/transits'
     | '/vedic'
+    | '/wuzhao'
+    | '/xiaocheng'
+    | '/xiaoliuren'
+    | '/zeri'
     | '/ziwei'
     | '/history/$id'
   fileRoutesById: FileRoutesById
@@ -382,13 +490,18 @@ export interface RootRouteChildren {
   BaziRoute: typeof BaziRoute
   CatalogRoute: typeof CatalogRoute
   CelebsRoute: typeof CelebsRoute
+  FeigongRoute: typeof FeigongRoute
   FengshuiRoute: typeof FengshuiRoute
   GeomancyRoute: typeof GeomancyRoute
   HistoryRoute: typeof HistoryRouteWithChildren
+  JieqiRoute: typeof JieqiRoute
+  JingjueRoute: typeof JingjueRoute
   JinkouRoute: typeof JinkouRoute
+  LingqiRoute: typeof LingqiRoute
   LiurenRoute: typeof LiurenRoute
   LiuyaoRoute: typeof LiuyaoRoute
   MeRoute: typeof MeRoute
+  MingotherRoute: typeof MingotherRoute
   NatalRoute: typeof NatalRoute
   PartsRoute: typeof PartsRoute
   QimenRoute: typeof QimenRoute
@@ -403,6 +516,10 @@ export interface RootRouteChildren {
   TarotRoute: typeof TarotRoute
   TransitsRoute: typeof TransitsRoute
   VedicRoute: typeof VedicRoute
+  WuzhaoRoute: typeof WuzhaoRoute
+  XiaochengRoute: typeof XiaochengRoute
+  XiaoliurenRoute: typeof XiaoliurenRoute
+  ZeriRoute: typeof ZeriRoute
   ZiweiRoute: typeof ZiweiRoute
 }
 
@@ -450,6 +567,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CelebsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/feigong': {
+      id: '/feigong'
+      path: '/feigong'
+      fullPath: '/feigong'
+      preLoaderRoute: typeof FeigongRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/fengshui': {
       id: '/fengshui'
       path: '/fengshui'
@@ -471,11 +595,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/jieqi': {
+      id: '/jieqi'
+      path: '/jieqi'
+      fullPath: '/jieqi'
+      preLoaderRoute: typeof JieqiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/jingjue': {
+      id: '/jingjue'
+      path: '/jingjue'
+      fullPath: '/jingjue'
+      preLoaderRoute: typeof JingjueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/jinkou': {
       id: '/jinkou'
       path: '/jinkou'
       fullPath: '/jinkou'
       preLoaderRoute: typeof JinkouRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lingqi': {
+      id: '/lingqi'
+      path: '/lingqi'
+      fullPath: '/lingqi'
+      preLoaderRoute: typeof LingqiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/liuren': {
@@ -497,6 +642,13 @@ declare module '@tanstack/react-router' {
       path: '/me'
       fullPath: '/me'
       preLoaderRoute: typeof MeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mingother': {
+      id: '/mingother'
+      path: '/mingother'
+      fullPath: '/mingother'
+      preLoaderRoute: typeof MingotherRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/natal': {
@@ -597,6 +749,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VedicRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/wuzhao': {
+      id: '/wuzhao'
+      path: '/wuzhao'
+      fullPath: '/wuzhao'
+      preLoaderRoute: typeof WuzhaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/xiaocheng': {
+      id: '/xiaocheng'
+      path: '/xiaocheng'
+      fullPath: '/xiaocheng'
+      preLoaderRoute: typeof XiaochengRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/xiaoliuren': {
+      id: '/xiaoliuren'
+      path: '/xiaoliuren'
+      fullPath: '/xiaoliuren'
+      preLoaderRoute: typeof XiaoliurenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/zeri': {
+      id: '/zeri'
+      path: '/zeri'
+      fullPath: '/zeri'
+      preLoaderRoute: typeof ZeriRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ziwei': {
       id: '/ziwei'
       path: '/ziwei'
@@ -632,13 +812,18 @@ const rootRouteChildren: RootRouteChildren = {
   BaziRoute: BaziRoute,
   CatalogRoute: CatalogRoute,
   CelebsRoute: CelebsRoute,
+  FeigongRoute: FeigongRoute,
   FengshuiRoute: FengshuiRoute,
   GeomancyRoute: GeomancyRoute,
   HistoryRoute: HistoryRouteWithChildren,
+  JieqiRoute: JieqiRoute,
+  JingjueRoute: JingjueRoute,
   JinkouRoute: JinkouRoute,
+  LingqiRoute: LingqiRoute,
   LiurenRoute: LiurenRoute,
   LiuyaoRoute: LiuyaoRoute,
   MeRoute: MeRoute,
+  MingotherRoute: MingotherRoute,
   NatalRoute: NatalRoute,
   PartsRoute: PartsRoute,
   QimenRoute: QimenRoute,
@@ -653,6 +838,10 @@ const rootRouteChildren: RootRouteChildren = {
   TarotRoute: TarotRoute,
   TransitsRoute: TransitsRoute,
   VedicRoute: VedicRoute,
+  WuzhaoRoute: WuzhaoRoute,
+  XiaochengRoute: XiaochengRoute,
+  XiaoliurenRoute: XiaoliurenRoute,
+  ZeriRoute: ZeriRoute,
   ZiweiRoute: ZiweiRoute,
 }
 export const routeTree = rootRouteImport
